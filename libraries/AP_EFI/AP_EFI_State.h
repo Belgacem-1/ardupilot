@@ -17,7 +17,7 @@
 
 #define EFI_MAX_INSTANCES 2
 #define EFI_MAX_BACKENDS 2
-#define ENGINE_MAX_CYLINDERS 1
+#define ENGINE_MAX_CYLINDERS 2
 
 #include <AP_Common/AP_Common.h>
 #include <AP_HAL/AP_HAL.h>
@@ -170,6 +170,18 @@ struct EFI_State {
     // Oil temperature (kelvin)
     float oil_temperature;
 
+    //Outside temperature (°C)
+    float outside_temperature;
+
+    // Input voltage (V)
+    float input_voltage;
+
+    // Servo voltage (V)
+    float servo_voltage;
+
+    // Fuel tank level (liter)
+    float fuel_tank_level;
+
     // Fuel pressure (kilopascal)
     float fuel_pressure;
 
@@ -183,7 +195,10 @@ struct EFI_State {
     float estimated_consumed_fuel_volume_cm3;
 
     // Throttle position (percent)
-    uint8_t throttle_position_percent;
+    uint16_t throttle_position_percent;
+
+    // Cooler servo position (percent)
+    uint8_t cooler_position_percent; 
 
     // The index of the publishing ECU.
     uint8_t ecu_index;

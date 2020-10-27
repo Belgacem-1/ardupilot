@@ -18,6 +18,7 @@
 #if EFI_ENABLED
 
 #include "AP_EFI_Serial_MS.h"
+#include "AP_EFI_Serial_Fiala.h"
 #include <AP_Logger/AP_Logger.h>
 
 extern const AP_HAL::HAL& hal;
@@ -27,7 +28,7 @@ const AP_Param::GroupInfo AP_EFI::var_info[] = {
     // @Param: _TYPE
     // @DisplayName: EFI communication type
     // @Description: What method of communication is used for EFI #1
-    // @Values: 0:None,1:Serial-MS
+    // @Values: 0:None,1:Serial-MS,2:Serial-fiala
     // @User: Advanced
     // @RebootRequired: True
     AP_GROUPINFO_FLAGS("_TYPE", 1, AP_EFI, type, 0, AP_PARAM_FLAG_ENABLE),
@@ -71,6 +72,10 @@ void AP_EFI::init(void)
     if (type == EFI_COMMUNICATION_TYPE_SERIAL_MS) {
         backend = new AP_EFI_Serial_MS(*this);
     }
+     // Check for MegaSquirt Serial EFI
+    if (type == EFI_COMMUNICATION_TYPE_SERIAL_FIALA) {
+        backend = new AP_EFI_Serial_Fiala(*this);
+    }
 }
 
 // Ask all backends to update the frontend
@@ -111,15 +116,15 @@ void AP_EFI::log_status(void)
 // @Field: IDX: Index of the publishing ECU
     AP::logger().Write("EFI",
                        "TimeUS,LP,Rpm,SDT,ATM,IMP,IMT,ECT,OilP,OilT,FP,FCR,CFV,TPS,IDX",
-                       "s%qsPPOOPOP--%-",
-                       "F00C--00-0-0000",
-                       "QBIffffffffffBB",
+                       "s%qvv-OOPOP--%-",
+                       "F0000000-0-0000",
+                       "QBIffffffffffHB",
                        AP_HAL::micros64(),
                        uint8_t(state.engine_load_percent),
                        uint32_t(state.engine_speed_rpm),
-                       float(state.spark_dwell_time_ms),
-                       float(state.atmospheric_pressure_kpa),
-                       float(state.intake_manifold_pressure_kpa),
+                       float(state.input_voltage),
+                       float(state.servo_voltage),
+                       float(state.fuel_tank_level),
                        float(state.intake_manifold_temperature),
                        float(state.coolant_temperature),
                        float(state.oil_pressure),
@@ -127,9 +132,9 @@ void AP_EFI::log_status(void)
                        float(state.fuel_pressure),
                        float(state.fuel_consumption_rate_cm3pm),
                        float(state.estimated_consumed_fuel_volume_cm3),
-                       uint8_t(state.throttle_position_percent),
+                       uint16_t(state.throttle_position_percent),
                        uint8_t(state.ecu_index));
-
+ 
 // @LoggerMessage: EFI2
 // @Description: Electronic Fuel Injection system data - redux
 // @Field: TimeUS: Time since system startup
@@ -208,12 +213,12 @@ void AP_EFI::send_mavlink_status(mavlink_channel_t chan)
         state.fuel_consumption_rate_cm3pm,
         state.engine_load_percent,
         state.throttle_position_percent,
-        state.spark_dwell_time_ms,
-        state.atmospheric_pressure_kpa,
-        state.intake_manifold_pressure_kpa,
+        state.input_voltage,
+        state.servo_voltage,
+        state.fuel_tank_level,
         (state.intake_manifold_temperature - 273.0f),
-        (state.cylinder_status[0].cylinder_head_temperature - 273.0f),
-        state.cylinder_status[0].ignition_timing_deg,
+        state.cylinder_status[0].cylinder_head_temperature,
+        state.cylinder_status[1].cylinder_head_temperature,
         state.cylinder_status[0].injection_time_ms,
         0, 0, 0);
 }
