@@ -45,9 +45,6 @@ void AP_EFI_Serial_Fiala::update()
 
     if (port->available() == 0 || now - last_response_ms > 200) {
         port->discard_input();
-        // Request an update from the realtime table (7).
-        // The data we need start at offset 6 and ends at 129
-    }
 }
 
 bool AP_EFI_Serial_Fiala::read_incoming_realtime_data() 
@@ -88,6 +85,9 @@ bool AP_EFI_Serial_Fiala::read_incoming_realtime_data()
                 offset++;
                 internal_state.cylinder_status[1].exhaust_gas_temperature = (float)((data << 8) + read_byte());
                 break;
+            case OT_MSB:
+                internal_state.outside_temperature = (float)((data << 8) + read_byte());
+                offset++;
             case RPM_MSB:
                 internal_state.engine_speed_rpm = (data << 8) + read_byte();
                 offset++;
@@ -119,7 +119,7 @@ bool AP_EFI_Serial_Fiala::read_incoming_realtime_data()
                 internal_state.fuel_pressure = temp_float;
                 offset++;
                 break;
-            case FC_MSB:
+            case FCR_MSB:
                 temp_float = ((float)((data << 8) + read_byte())/100.0f)*16.66;
                 internal_state.fuel_consumption_rate_cm3pm = temp_float;
                 offset++;

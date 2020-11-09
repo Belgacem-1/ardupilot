@@ -84,7 +84,7 @@ private:
         FTL_LSB,
         FP_MSB,
         FP_LSB,
-        FC_MSB,
+        FCR_MSB,
         FC_LSB,
         IL_MSB = 44,
         IL_LSB,
