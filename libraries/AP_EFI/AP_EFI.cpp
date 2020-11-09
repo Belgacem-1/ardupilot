@@ -102,9 +102,9 @@ void AP_EFI::log_status(void)
 // @Field: TimeUS: Time since system startup
 // @Field: LP: Reported engine load
 // @Field: Rpm: Reported engine RPM
-// @Field: SDT: Spark Dwell Time
-// @Field: ATM: Atmospheric pressure
-// @Field: IMP: Intake manifold pressure
+// @Field: IV: Input voltage
+// @Field: SV: Servo voltage
+// @Field: FTL: Fuel tank level
 // @Field: IMT: Intake manifold temperature
 // @Field: ECT: Engine Coolant Temperature
 // @Field: OilP: Oil Pressure
@@ -115,7 +115,7 @@ void AP_EFI::log_status(void)
 // @Field: TPS: Throttle Position
 // @Field: IDX: Index of the publishing ECU
     AP::logger().Write("EFI",
-                       "TimeUS,LP,Rpm,SDT,ATM,IMP,IMT,ECT,OilP,OilT,FP,FCR,CFV,TPS,IDX",
+                       "TimeUS,LP,Rpm,IV,SV,FTL,IMT,ECT,OilP,OilT,FP,FCR,CFV,TPS,IDX",
                        "s%qvv-OOPOP--%-",
                        "F0000000-0-0000",
                        "QBIffffffffffHB",
