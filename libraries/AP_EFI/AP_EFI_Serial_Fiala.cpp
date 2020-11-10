@@ -45,6 +45,7 @@ void AP_EFI_Serial_Fiala::update()
 
     if (port->available() == 0 || now - last_response_ms > 200) {
         port->discard_input();
+    }
 }
 
 bool AP_EFI_Serial_Fiala::read_incoming_realtime_data() 
