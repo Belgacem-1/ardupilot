@@ -53,6 +53,9 @@ public:
 
     static AP_ICEngine *get_singleton() { return _singleton; }
 
+protected:
+    void set_ignition_relay(uint8_t relay, bool val);
+
 private:
     static AP_ICEngine *_singleton;
 

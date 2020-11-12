@@ -15,6 +15,7 @@
 
 
 #include <SRV_Channel/SRV_Channel.h>
+#include <AP_ServoRelayEvents/AP_ServoRelayEvents.h>
 #include <GCS_MAVLink/GCS.h>
 #include <AP_AHRS/AP_AHRS.h>
 #include <AP_Scheduler/AP_Scheduler.h>
@@ -140,7 +141,7 @@ const AP_Param::GroupInfo AP_ICEngine::var_info[] = {
     // @Description: This is a minimum PWM value for engine start channel for an engine stop to be commanded. Setting this value will avoid RC input glitches with low PWM values from causing an unwanted engine stop. A value of zero means any PWM below 1300 triggers an engine stop.
     // @User: Standard
     // @Range: 0 1300
-    AP_GROUPINFO("STARTCHN_MIN", 16, AP_ICEngine, start_chan_min_pwm, 0),
+    AP_GROUPINFO("STARTCHN_MIN", 16, AP_ICEngine, start_chan_min_pwm, 0), 
 
     AP_GROUPEND
 };
@@ -291,19 +292,22 @@ void AP_ICEngine::update(void)
     /* now set output channels */
     switch (state) {
     case ICE_OFF:
-        SRV_Channels::set_output_pwm(SRV_Channel::k_ignition, pwm_ignition_off);
+        set_ignition_relay(1, 1);
+        //SRV_Channels::set_output_pwm(SRV_Channel::k_ignition, pwm_ignition_off);
         SRV_Channels::set_output_pwm(SRV_Channel::k_starter,  pwm_starter_off);
         starter_start_time_ms = 0;
         break;
 
     case ICE_START_HEIGHT_DELAY:
     case ICE_START_DELAY:
-        SRV_Channels::set_output_pwm(SRV_Channel::k_ignition, pwm_ignition_on);
+        set_ignition_relay(1, 0);
+        //SRV_Channels::set_output_pwm(SRV_Channel::k_ignition, pwm_ignition_on);
         SRV_Channels::set_output_pwm(SRV_Channel::k_starter,  pwm_starter_off);
         break;
 
     case ICE_STARTING:
-        SRV_Channels::set_output_pwm(SRV_Channel::k_ignition, pwm_ignition_on);
+        set_ignition_relay(1, 0);
+        //SRV_Channels::set_output_pwm(SRV_Channel::k_ignition, pwm_ignition_on);
         SRV_Channels::set_output_pwm(SRV_Channel::k_starter,  pwm_starter_on);
         if (starter_start_time_ms == 0) {
             starter_start_time_ms = now;
@@ -312,11 +316,21 @@ void AP_ICEngine::update(void)
         break;
 
     case ICE_RUNNING:
-        SRV_Channels::set_output_pwm(SRV_Channel::k_ignition, pwm_ignition_on);
+        set_ignition_relay(1, 0);
+        //SRV_Channels::set_output_pwm(SRV_Channel::k_ignition, pwm_ignition_on);
         SRV_Channels::set_output_pwm(SRV_Channel::k_starter,  pwm_starter_off);
         starter_start_time_ms = 0;
         break;
     }
+}
+
+void AP_ICEngine::set_ignition_relay(const uint8_t relay, bool val)
+{
+    AP_ServoRelayEvents *servorelayevents = AP::servorelayevents();
+    if (servorelayevents == nullptr) {
+        return;
+    }
+    servorelayevents->do_set_relay(relay, val);
 }
 
 
