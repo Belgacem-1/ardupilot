@@ -1,0 +1,98 @@
+diff --git a/message_definitions/v1.0/common.xml b/message_definitions/v1.0/common.xml
+index 4e7abfa3..4f1d74b6 100644
+--- a/message_definitions/v1.0/common.xml
++++ b/message_definitions/v1.0/common.xml
+@@ -4934,14 +4934,20 @@
+       <field type="float" name="throttle_position" units="%">Throttle position</field>
+       <field type="float" name="spark_dwell_time" units="ms">Spark dwell time</field>
+       <field type="float" name="barometric_pressure" units="kPa">Barometric pressure</field>
+-      <field type="float" name="intake_manifold_pressure" units="kPa">Intake manifold pressure(</field>
++      <field type="float" name="intake_manifold_pressure" units="kPa">Intake manifold pressure</field>
+       <field type="float" name="intake_manifold_temperature" units="degC">Intake manifold temperature</field>
+-      <field type="float" name="cylinder_head_temperature" units="degC">Cylinder head temperature</field>
++      <field type="float" name="cylinder_head_temperature" units="degC">First cylinder head temperature</field>
+       <field type="float" name="ignition_timing" units="deg">Ignition timing (Crank angle degrees)</field>
+       <field type="float" name="injection_time" units="ms">Injection time</field>
+       <field type="float" name="exhaust_gas_temperature" units="degC">Exhaust gas temperature</field>
+       <field type="float" name="throttle_out" units="%">Output throttle</field>
+       <field type="float" name="pt_compensation">Pressure/temperature compensation</field>
++      <field type="float" name="cylinder_head_temperature2" units="degC">Second cylinder head temperature</field>
++      <field type="float" name="fuel_pressure" units="bar">fuel pressure</field>
++      <field type="float" name="fuel_level" units="l">Tank fuel level</field>
++      <field type="float" name="input_voltage" units="V">EFI input voltage</field>
++      <field type="float" name="servo_voltage" units="V">Throttle servo input voltage</field>
++      <field type="float" name="fuel_level" units="l">Tank fuel level </field>
+     </message>
+     <!-- MESSAGE IDs 180 - 229: Space for custom messages in individual projectname_messages.xml files -->
+     <message id="230" name="ESTIMATOR_STATUS">
+@@ -5054,6 +5060,21 @@
+       <field type="int8_t" name="custom0">Field for custom payload.</field>
+       <field type="int8_t" name="custom1">Field for custom payload.</field>
+       <field type="int8_t" name="custom2">Field for custom payload.</field>
++    </message>
++        <message id="236" name="EFI2_STATUS">
++      <description>EFI2 status output</description>
++      <field type="uint8_t" name="health">EFI2 health status</field>
++      <field type="float" name="rpm">RPM</field>
++      <field type="float" name="fuel_consumed" units="g">Fuel consumed</field>
++      <field type="float" name="fuel_flow" units="g/min">Fuel flow rate</field>
++      <field type="float" name="throttle_position" units="%">Throttle position</field>
++      <field type="float" name="cylinder_head_temperature" units="degC">First cylinder head temperature</field>
++      <field type="float" name="injection_time" units="ms">Injection time</field>
++      <field type="float" name="cylinder_head_temperature2" units="degC">Second cylinder head temperature</field>
++      <field type="float" name="fuel_pressure" units="bar">fuel pressure</field>
++      <field type="float" name="fuel_level" units="l">Tank fuel level</field>
++      <field type="float" name="input_voltage" units="V">EFI2 input voltage</field>
++      <field type="float" name="servo_voltage" units="V">Throttle servo input voltage</field>
+     </message>
+     <message id="241" name="VIBRATION">
+       <description>Vibration levels and accelerometer clipping</description>
+diff --git a/message_definitions/v1.0/common.xml b/message_definitions/v1.0/common.xml
+index 4e7abfa3..4f1d74b6 100644
+--- a/message_definitions/v1.0/common.xml
++++ b/message_definitions/v1.0/common.xml
+@@ -4934,14 +4934,20 @@
+       <field type="float" name="throttle_position" units="%">Throttle position</field>
+       <field type="float" name="spark_dwell_time" units="ms">Spark dwell time</field>
+       <field type="float" name="barometric_pressure" units="kPa">Barometric pressure</field>
+-      <field type="float" name="intake_manifold_pressure" units="kPa">Intake manifold pressure(</field>
++      <field type="float" name="intake_manifold_pressure" units="kPa">Intake manifold pressure</field>
+       <field type="float" name="intake_manifold_temperature" units="degC">Intake manifold temperature</field>
+-      <field type="float" name="cylinder_head_temperature" units="degC">Cylinder head temperature</field>
++      <field type="float" name="cylinder_head_temperature" units="degC">First cylinder head temperature</field>
+       <field type="float" name="ignition_timing" units="deg">Ignition timing (Crank angle degrees)</field>
+       <field type="float" name="injection_time" units="ms">Injection time</field>
+       <field type="float" name="exhaust_gas_temperature" units="degC">Exhaust gas temperature</field>
+       <field type="float" name="throttle_out" units="%">Output throttle</field>
+       <field type="float" name="pt_compensation">Pressure/temperature compensation</field>
++      <field type="float" name="cylinder_head_temperature2" units="degC">Second cylinder head temperature</field>
++      <field type="float" name="fuel_pressure" units="bar">fuel pressure</field>
++      <field type="float" name="fuel_level" units="l">Tank fuel level</field>
++      <field type="float" name="input_voltage" units="V">EFI input voltage</field>
++      <field type="float" name="servo_voltage" units="V">Throttle servo input voltage</field>
++      <field type="float" name="fuel_level" units="l">Tank fuel level </field>
+     </message>
+     <!-- MESSAGE IDs 180 - 229: Space for custom messages in individual projectname_messages.xml files -->
+     <message id="230" name="ESTIMATOR_STATUS">
+@@ -5054,6 +5060,21 @@
+       <field type="int8_t" name="custom0">Field for custom payload.</field>
+       <field type="int8_t" name="custom1">Field for custom payload.</field>
+       <field type="int8_t" name="custom2">Field for custom payload.</field>
++    </message>
++        <message id="236" name="EFI2_STATUS">
++      <description>EFI2 status output</description>
++      <field type="uint8_t" name="health">EFI2 health status</field>
++      <field type="float" name="rpm">RPM</field>
++      <field type="float" name="fuel_consumed" units="g">Fuel consumed</field>
++      <field type="float" name="fuel_flow" units="g/min">Fuel flow rate</field>
++      <field type="float" name="throttle_position" units="%">Throttle position</field>
++      <field type="float" name="cylinder_head_temperature" units="degC">First cylinder head temperature</field>
++      <field type="float" name="injection_time" units="ms">Injection time</field>
++      <field type="float" name="cylinder_head_temperature2" units="degC">Second cylinder head temperature</field>
++      <field type="float" name="fuel_pressure" units="bar">fuel pressure</field>
++      <field type="float" name="fuel_level" units="l">Tank fuel level</field>
++      <field type="float" name="input_voltage" units="V">EFI2 input voltage</field>
++      <field type="float" name="servo_voltage" units="V">Throttle servo input voltage</field>
+     </message>
+     <message id="241" name="VIBRATION">
+       <description>Vibration levels and accelerometer clipping</description>
