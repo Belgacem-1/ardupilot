@@ -1,7 +1,7 @@
-diff --git a/message_definitions/v1.0/common.xml b/message_definitions/v1.0/common.xml
+diff --git a/modules/mavlink/message_definitions/v1.0/common.xml b/modules/mavlink/message_definitions/v1.0/common.xml
 index 4e7abfa3..f1ca27a4 100644
---- a/message_definitions/v1.0/common.xml
-+++ b/message_definitions/v1.0/common.xml
+--- a/modules/mavlink/message_definitions/v1.0/common.xml
++++ b/modules/mavlink/message_definitions/v1.0/common.xml
 @@ -4928,20 +4928,25 @@
        <field type="uint8_t" name="health">EFI health status</field>
        <field type="float" name="ecu_index">ECU index</field>
