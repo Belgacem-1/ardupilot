@@ -211,16 +211,19 @@ void AP_EFI::send_mavlink_status(mavlink_channel_t chan)
         state.engine_speed_rpm,
         state.estimated_consumed_fuel_volume_cm3,
         state.fuel_consumption_rate_cm3pm,
-        state.engine_load_percent,
+        0,
         state.throttle_position_percent,
-        state.input_voltage,
-        state.servo_voltage,
-        state.fuel_tank_level,
-        (state.intake_manifold_temperature - 273.0f),
+        0, 0,
+        state.intake_manifold_pressure_kpa,
+        0,
         state.cylinder_status[0].cylinder_head_temperature,
-        state.cylinder_status[1].cylinder_head_temperature,
+        0,
         state.cylinder_status[0].injection_time_ms,
-        0, 0, 0);
+        0, 0, 0,
+        state.cylinder_status[1].cylinder_head_temperature,
+        state.fuel_tank_level,
+        state.input_voltage,
+        state.servo_voltage);
 }
 
 namespace AP {
