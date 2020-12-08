@@ -39,12 +39,13 @@ protected:
     HAL_Semaphore sem;
 
     // Internal state for this driver (before copying to frontend)
-    EFI_State internal_state;
+    EFI_State internal_state[EFI_MAX_INSTANCES];
 
     int8_t get_uavcan_node_id(void) const;
     float get_coef1(void) const;
     float get_coef2(void) const;
 
-private:
+protected:
     AP_EFI &frontend;
+    uint8_t instance;
 };

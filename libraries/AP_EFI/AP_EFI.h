@@ -57,12 +57,12 @@ public:
     void update();
     
     // Returns the RPM
-    uint32_t get_rpm() const { return state.engine_speed_rpm; }
+    uint32_t get_rpm(uint8_t i) const { return state[i].engine_speed_rpm; }
 
     // returns enabled state of EFI
-    bool enabled() const { return type != EFI_COMMUNICATION_TYPE_NONE; }
+    bool enabled(uint8_t i) const { return type[i] != EFI_COMMUNICATION_TYPE_NONE; }
 
-    bool is_healthy() const;
+    bool is_healthy(uint8_t i) const;
 
     // Parameter info
     static const struct AP_Param::GroupInfo var_info[];
@@ -79,7 +79,9 @@ public:
     }
 
     // send EFI_STATUS
-    void send_mavlink_status(mavlink_channel_t chan);
+    void send_mavlink_efi_status(mavlink_channel_t chan);
+
+    void send_mavlink_efi2_status(mavlink_channel_t chan);
 
 protected:
 
@@ -87,18 +89,19 @@ protected:
     AP_Float coef1;
     AP_Float coef2;
 
-    EFI_State state;
+    EFI_State state[EFI_MAX_INSTANCES];
 
 private:
     // Front End Parameters
-    AP_Int8 type;
+    AP_Int8 type[EFI_MAX_INSTANCES];
 
     // Tracking backends
-    AP_EFI_Backend *backend;
+    AP_EFI_Backend *backend[EFI_MAX_INSTANCES];
     static AP_EFI *singleton;
+    uint8_t num_instances:2;
 
     // write to log
-    void log_status();
+    void log_status(uint8_t i);
 };
 
 namespace AP {

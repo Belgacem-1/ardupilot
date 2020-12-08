@@ -44,6 +44,7 @@ private:
     uint8_t packet_flag;
     uint16_t message_counter;
     uint32_t last_response_ms;
+    uint8_t _instance;
 
     // confirmed that last command was ok
     bool last_command_confirmed;

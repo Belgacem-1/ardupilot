@@ -29,7 +29,7 @@ AP_EFI_Backend::AP_EFI_Backend(AP_EFI &_frontend) :
 void AP_EFI_Backend::copy_to_frontend() 
 {
     WITH_SEMAPHORE(sem);
-    frontend.state = internal_state;
+    frontend.state[instance] = internal_state[instance];
 }
 
 float AP_EFI_Backend::get_coef1(void) const

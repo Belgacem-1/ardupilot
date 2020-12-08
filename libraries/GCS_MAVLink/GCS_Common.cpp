@@ -809,6 +809,7 @@ ap_message GCS_MAVLINK::mavlink_id_to_ap_message_id(const uint32_t mavlink_id) c
         { MAVLINK_MSG_ID_EXTENDED_SYS_STATE,    MSG_EXTENDED_SYS_STATE},
         { MAVLINK_MSG_ID_AUTOPILOT_VERSION,     MSG_AUTOPILOT_VERSION},
         { MAVLINK_MSG_ID_EFI_STATUS,            MSG_EFI_STATUS},
+        //{ MAVLINK_MSG_ID_EFI2_STATUS,           MSG_EFI2_STATUS},
         { MAVLINK_MSG_ID_GENERATOR_STATUS,      MSG_GENERATOR_STATUS},
         { MAVLINK_MSG_ID_WINCH_STATUS,          MSG_WINCH_STATUS},
             };
@@ -1757,7 +1758,7 @@ void GCS_MAVLINK::send_scaled_pressure_instance(uint8_t instance, void (*send_fn
         airspeed->enabled(instance)) {
         press_diff = airspeed->get_differential_pressure(instance) * 0.01f;
         float temp;
-        if (airspeed->get_temperature(instance,temp)) {
+        if (airspeed->giyt diff (instance,temp)) {
             temperature_press_diff = temp * 100;
             if (temperature_press_diff == 0) {
                 // don't send zero as that is the value for 'no data'
@@ -4791,11 +4792,22 @@ bool GCS_MAVLINK::try_send_message(const enum ap_message id)
         CHECK_PAYLOAD_SIZE(EFI_STATUS);
         AP_EFI *efi = AP::EFI();
         if (efi) {
-            efi->send_mavlink_status(chan);
+            efi->send_mavlink_efi_status(chan);
         }
 #endif
         break;
     }
+
+    /*case MSG_EFI2_STATUS: {
+#if EFI_MAX_INSTANCES > 1
+        CHECK_PAYLOAD_SIZE(EFI2_STATUS);
+        AP_EFI *efi = AP::EFI();
+        if (efi) {
+            efi->send_mavlink_efi2_status(chan);
+        }
+#endif
+        break;
+    }*/
 
     case MSG_WINCH_STATUS:
         CHECK_PAYLOAD_SIZE(WINCH_STATUS);
