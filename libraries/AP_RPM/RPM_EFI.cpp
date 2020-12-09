@@ -35,7 +35,7 @@ void AP_RPM_EFI::update(void)
     if (efi == nullptr) {
         return;
     }
-    state.rate_rpm = efi->get_rpm();
+    state.rate_rpm = efi->get_rpm(instance);
     state.rate_rpm *= ap_rpm._scaling[state.instance];
     state.signal_quality = 0.5f;
     state.last_reading_ms = AP_HAL::millis();

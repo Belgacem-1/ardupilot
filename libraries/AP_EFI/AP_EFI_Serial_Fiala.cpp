@@ -21,11 +21,10 @@
 
 extern const AP_HAL::HAL &hal;
 
-AP_EFI_Serial_Fiala::AP_EFI_Serial_Fiala(AP_EFI &_frontend):
-    AP_EFI_Backend(_frontend)
+AP_EFI_Serial_Fiala::AP_EFI_Serial_Fiala(AP_EFI &_frontend, uint8_t _instance):
+    AP_EFI_Backend(_frontend, _instance)
 {
-    _instance = frontend.num_instances;
-    internal_state[_instance].estimated_consumed_fuel_volume_cm3 = 0; // Just to be sure
+    internal_state.estimated_consumed_fuel_volume_cm3 = 0; // Just to be sure
     port = AP::serialmanager().find_serial(AP_SerialManager::SerialProtocol_EFI_Fiala, 0);
 }
 
@@ -73,62 +72,62 @@ bool AP_EFI_Serial_Fiala::read_incoming_realtime_data()
         switch (offset) {
             case CHT1_MSB:
                 offset++;
-                internal_state[_instance].cylinder_status[0].cylinder_head_temperature = (float)((data << 8) + read_byte());
+                internal_state.cylinder_status[0].cylinder_head_temperature = (float)((data << 8) + read_byte());
                 break;
             case CHT2_MSB:
                 offset++;
-                internal_state[_instance].cylinder_status[1].cylinder_head_temperature = (float)((data << 8) + read_byte());
+                internal_state.cylinder_status[1].cylinder_head_temperature = (float)((data << 8) + read_byte());
                 break;
             case EGT1_MSB:
                 offset++;
-                internal_state[_instance].cylinder_status[0].exhaust_gas_temperature = (float)((data << 8) + read_byte());
+                internal_state.cylinder_status[0].exhaust_gas_temperature = (float)((data << 8) + read_byte());
                 break;
             case EGT2_MSB:
                 offset++;
-                internal_state[_instance].cylinder_status[1].exhaust_gas_temperature = (float)((data << 8) + read_byte());
+                internal_state.cylinder_status[1].exhaust_gas_temperature = (float)((data << 8) + read_byte());
                 break;
             case OT_MSB:
-                internal_state[_instance].outside_temperature = (float)((data << 8) + read_byte());
+                internal_state.outside_temperature = (float)((data << 8) + read_byte());
                 offset++;
             case RPM_MSB:
-                internal_state[_instance].engine_speed_rpm = (data << 8) + read_byte();
+                internal_state.engine_speed_rpm = (data << 8) + read_byte();
                 offset++;
                 break;
             case INV_MSB:
-                internal_state[_instance].input_voltage = (float)((data << 8) + read_byte())/10.0f;
+                internal_state.input_voltage = (float)((data << 8) + read_byte())/10.0f;
                 offset++;
                 break;
             case SV_MSB:
-                internal_state[_instance].servo_voltage = (float)((data << 8) + read_byte())/10.0f;
+                internal_state.servo_voltage = (float)((data << 8) + read_byte())/10.0f;
                 offset++;
                 break;
             case TPS_MSB:
                 offset++;
-                internal_state[_instance].throttle_position_percent = (float)((data << 8) + read_byte());
+                internal_state.throttle_position_percent = (float)((data << 8) + read_byte());
                 break;
             case CPS_MSB:
                 offset++;
-                internal_state[_instance].cooler_position_percent = data;
+                internal_state.cooler_position_percent = data;
                 break;
             case FTL_MSB:
                 offset++;
                 temp_float = (float)((data << 8) + read_byte())/10.0f;
-                internal_state[_instance].fuel_tank_level = temp_float;
+                internal_state.fuel_tank_level = temp_float;
                 break;
             case FP_MSB:
                 // Fiala Fuel Pressure is unitless, store as bar anyway
                 temp_float = (float)((data << 8) + read_byte())/10.0f;
-                internal_state[_instance].fuel_pressure = temp_float;
+                internal_state.fuel_pressure = temp_float;
                 offset++;
                 break;
             case FCR_MSB:
                 temp_float = ((float)((data << 8) + read_byte())/100.0f)*16.66;
-                internal_state[_instance].fuel_consumption_rate_cm3pm = temp_float;
+                internal_state.fuel_consumption_rate_cm3pm = temp_float;
                 offset++;
                 break; 
             case IL_MSB:
                 temp_float = (float)((data << 8) + read_byte())/1000.0f;
-                internal_state[_instance].cylinder_status[0].injection_time_ms = temp_float;
+                internal_state.cylinder_status[0].injection_time_ms = temp_float;
                 offset++;
                 break;               
         }
@@ -147,10 +146,10 @@ bool AP_EFI_Serial_Fiala::read_incoming_realtime_data()
     uint32_t current_time = AP_HAL::millis();
     // Super Simplified integration method - Error Analysis TBD
     // This calcualtion gives erroneous results when the engine isn't running
-    if (internal_state[_instance].engine_speed_rpm > RPM_THRESHOLD) {
-        internal_state[_instance].estimated_consumed_fuel_volume_cm3 += internal_state[_instance].fuel_consumption_rate_cm3pm * (current_time - internal_state[_instance].last_updated_ms)/60000.0f;
+    if (internal_state.engine_speed_rpm > RPM_THRESHOLD) {
+        internal_state.estimated_consumed_fuel_volume_cm3 += internal_state.fuel_consumption_rate_cm3pm * (current_time - internal_state.last_updated_ms)/60000.0f;
     }
-    internal_state[_instance].last_updated_ms = current_time;
+    internal_state.last_updated_ms = current_time;
     
     return true;
          

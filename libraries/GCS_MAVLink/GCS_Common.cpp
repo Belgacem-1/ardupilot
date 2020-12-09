@@ -1758,7 +1758,7 @@ void GCS_MAVLINK::send_scaled_pressure_instance(uint8_t instance, void (*send_fn
         airspeed->enabled(instance)) {
         press_diff = airspeed->get_differential_pressure(instance) * 0.01f;
         float temp;
-        if (airspeed->giyt diff (instance,temp)) {
+        if (airspeed->get_temperature(instance,temp)) {
             temperature_press_diff = temp * 100;
             if (temperature_press_diff == 0) {
                 // don't send zero as that is the value for 'no data'

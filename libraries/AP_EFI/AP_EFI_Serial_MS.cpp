@@ -21,8 +21,8 @@
 
 extern const AP_HAL::HAL &hal;
 
-AP_EFI_Serial_MS::AP_EFI_Serial_MS(AP_EFI &_frontend):
-    AP_EFI_Backend(_frontend)
+AP_EFI_Serial_MS::AP_EFI_Serial_MS(AP_EFI &_frontend, uint8_t _instance):
+    AP_EFI_Backend(_frontend, _instance)
 {
     internal_state.estimated_consumed_fuel_volume_cm3 = 0; // Just to be sure
     port = AP::serialmanager().find_serial(AP_SerialManager::SerialProtocol_EFI_MS, 0);
