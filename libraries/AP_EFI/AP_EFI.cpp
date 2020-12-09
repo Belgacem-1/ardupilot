@@ -12,7 +12,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 #include "AP_EFI.h"
 
 #if EFI_ENABLED
@@ -22,6 +21,7 @@
 #include <AP_Logger/AP_Logger.h>
 
 extern const AP_HAL::HAL& hal;
+#define VOLTS_TO_LITER 3.49f
 
 // table of user settable parameters
 const AP_Param::GroupInfo AP_EFI::var_info[] = {
@@ -74,6 +74,7 @@ AP_EFI::AP_EFI()
 // Initialize backends based on existing params
 void AP_EFI::init(void)
 {
+    source = hal.analogin->channel(15);
     if (num_instances != 0) {
         // init called a 2nd time?
         return;
@@ -111,11 +112,23 @@ bool AP_EFI::is_healthy(uint8_t i) const
     return (backend[i] && (AP_HAL::millis() - state[i].last_updated_ms) < HEALTHY_LAST_RECEIVED_MS);
 }
 
+bool AP_EFI::get_fuel_level(float &tfl)
+{
+    if (source == nullptr) {
+        return false;
+    }
+    // allow pin to change
+    source->set_pin(15);
+    tfl = source->voltage_average_ratiometric() * VOLTS_TO_LITER;
+    return true;
+}
+
 /*
   write status to log
  */
 void AP_EFI::log_status(uint8_t i)
 {
+    float fuel_level = 0;   
 // @LoggerMessage: EFI
 // @Description: Electronic Fuel Injection system data
 // @Field: TimeUS: Time since system startup
@@ -143,7 +156,7 @@ void AP_EFI::log_status(uint8_t i)
                        uint32_t(state[i].engine_speed_rpm),
                        float(state[i].input_voltage),
                        float(state[i].servo_voltage),
-                       float(state[i].fuel_tank_level),
+                       get_fuel_level(fuel_level)?fuel_level:float(state[i].fuel_tank_level),
                        float(state[i].intake_manifold_temperature),
                        float(state[i].coolant_temperature),
                        float(state[i].oil_pressure),
@@ -223,6 +236,7 @@ void AP_EFI::send_mavlink_efi_status(mavlink_channel_t chan)
     if (!backend) {
         return;
     }
+    float fuel_level = 0;
     mavlink_msg_efi_status_send(
         chan,
         AP_EFI::is_healthy(0),
@@ -240,7 +254,7 @@ void AP_EFI::send_mavlink_efi_status(mavlink_channel_t chan)
         state[0].cylinder_status[0].injection_time_ms,
         0, 0, 0,
         state[0].cylinder_status[1].cylinder_head_temperature,
-        state[0].fuel_tank_level,
+        get_fuel_level(fuel_level)?fuel_level:state[0].fuel_tank_level,
         state[0].input_voltage,
         state[0].servo_voltage);
 }

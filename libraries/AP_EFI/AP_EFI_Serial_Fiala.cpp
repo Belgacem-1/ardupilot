@@ -25,7 +25,7 @@ AP_EFI_Serial_Fiala::AP_EFI_Serial_Fiala(AP_EFI &_frontend, uint8_t _instance):
     AP_EFI_Backend(_frontend, _instance)
 {
     internal_state.estimated_consumed_fuel_volume_cm3 = 0; // Just to be sure
-    port = AP::serialmanager().find_serial(AP_SerialManager::SerialProtocol_EFI_Fiala, 0);
+    port = AP::serialmanager().find_serial(AP_SerialManager::SerialProtocol_Fiala_EM, 0);
 }
 
 

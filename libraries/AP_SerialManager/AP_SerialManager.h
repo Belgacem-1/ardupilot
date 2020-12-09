@@ -104,9 +104,9 @@
 #define AP_SERIALMANAGER_MSP_BAUD           115200
 
 // Fiala EFI protocol
-#define AP_SERIALMANAGER_EFI_FIALA_BAUD           9600
-#define AP_SERIALMANAGER_EFI_FIALA_BUFSIZE_RX     512
-#define AP_SERIALMANAGER_EFI_FIALA_BUFSIZE_TX     16
+#define AP_SERIALMANAGER_FIALA_EM_BAUD           9600
+#define AP_SERIALMANAGER_FIALA_EM_BUFSIZE_RX     512
+#define AP_SERIALMANAGER_FIALA_EM_BUFSIZE_TX     16
 
 class AP_SerialManager {
 public:
@@ -153,7 +153,7 @@ public:
         SerialProtocol_MSP = 32,
         SerialProtocol_DJI_FPV = 33,
         SerialProtocol_AirSpeed = 34,
-        SerialProtocol_EFI_Fiala = 35,
+        SerialProtocol_Fiala_EM = 35,
         SerialProtocol_NumProtocols                    // must be the last value
     };
 

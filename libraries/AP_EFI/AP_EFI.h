@@ -16,7 +16,7 @@
 #pragma once
 
 
-
+#include <AP_HAL/AP_HAL.h>
 #include <AP_Common/AP_Common.h>
 #include <AP_Param/AP_Param.h>
 #include <GCS_MAVLink/GCS.h>
@@ -64,6 +64,9 @@ public:
 
     bool is_healthy(uint8_t i) const;
 
+    // return the current fuel_level in liter
+    bool get_fuel_level(float &tfl);
+
     // Parameter info
     static const struct AP_Param::GroupInfo var_info[];
 
@@ -99,6 +102,7 @@ private:
     AP_EFI_Backend *backend[EFI_MAX_INSTANCES];
     static AP_EFI *singleton;
     uint8_t num_instances:2;
+    AP_HAL::AnalogSource *source;
 
     // write to log
     void log_status(uint8_t i);
