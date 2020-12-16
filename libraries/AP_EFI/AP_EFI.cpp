@@ -19,6 +19,7 @@
 #include "AP_EFI_Serial_MS.h"
 #include "AP_EFI_Serial_Fiala.h"
 #include <AP_Logger/AP_Logger.h>
+#include <stdio.h>
 
 extern const AP_HAL::HAL& hal;
 #define VOLTS_TO_LITER 3.49f
@@ -75,6 +76,7 @@ AP_EFI::AP_EFI()
 void AP_EFI::init(void)
 {
     source = hal.analogin->channel(15);
+    printf("EFI init\n");
     if (num_instances != 0) {
         // init called a 2nd time?
         return;
@@ -86,6 +88,7 @@ void AP_EFI::init(void)
         }
         // Check for Fiala EM
         if (type[i] == EFI_COMMUNICATION_TYPE_SERIAL_FIALA) {
+		   printf("Fiala instance %u\n",i);
            backend[i] = new AP_EFI_Serial_Fiala(*this, i);
         }
         if (backend[i] != nullptr) {
@@ -101,6 +104,7 @@ void AP_EFI::update()
 {
     for (uint8_t i=0; i<num_instances; i++) {
         if (backend[i]) {
+		   printf("EFI update %u\n",i);
            backend[i]->update();
            log_status(i);
         }
@@ -236,6 +240,7 @@ void AP_EFI::send_mavlink_efi_status(mavlink_channel_t chan)
     if (!backend) {
         return;
     }
+    printf("send mavlink message motor1\n");
     float fuel_level = 0;
     mavlink_msg_efi_status_send(
         chan,
@@ -265,6 +270,7 @@ void AP_EFI::send_mavlink_efi2_status(mavlink_channel_t chan)
     if (!backend) {
         return;
     }
+    printf("send mavlink message motor2\n");
     mavlink_msg_efi2_status_send(
         chan,
         AP_EFI::is_healthy(1),
