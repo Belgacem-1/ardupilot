@@ -21,8 +21,9 @@
 
 extern const AP_HAL::HAL &hal;
 
-AP_EFI_Backend::AP_EFI_Backend(AP_EFI &_frontend, uint8_t _instance) :
+AP_EFI_Backend::AP_EFI_Backend(AP_EFI &_frontend, EFI_State &_state, uint8_t _instance) :
     frontend(_frontend),
+    state(_state),
     instance(_instance)
 {
 }
@@ -30,7 +31,7 @@ AP_EFI_Backend::AP_EFI_Backend(AP_EFI &_frontend, uint8_t _instance) :
 void AP_EFI_Backend::copy_to_frontend() 
 {
     WITH_SEMAPHORE(sem);
-    frontend.state[instance] = internal_state;
+    //frontend.state[instance] = internal_state;
 }
 
 float AP_EFI_Backend::get_coef1(void) const

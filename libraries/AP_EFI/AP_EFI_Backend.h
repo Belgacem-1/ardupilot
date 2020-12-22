@@ -23,7 +23,7 @@ class AP_EFI; //forward declaration
 class AP_EFI_Backend {
 public:    
     // Constructor with initialization
-    AP_EFI_Backend(AP_EFI &_frontend, uint8_t _instance);
+    AP_EFI_Backend(AP_EFI &_frontend, EFI_State &_state, uint8_t _instance);
 
     // Virtual destructor that efi backends can override 
     virtual ~AP_EFI_Backend(void) {}
@@ -40,12 +40,13 @@ protected:
 
     // Internal state for this driver (before copying to frontend)
     EFI_State internal_state;
+    EFI_State &state;
 
     int8_t get_uavcan_node_id(void) const;
     float get_coef1(void) const;
     float get_coef2(void) const;
 
 private:
-    AP_EFI &frontend;
+    AP_EFI &frontend; 
     uint8_t instance;
 };

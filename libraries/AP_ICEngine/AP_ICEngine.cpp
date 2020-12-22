@@ -292,22 +292,22 @@ void AP_ICEngine::update(void)
     /* now set output channels */
     switch (state) {
     case ICE_OFF:
-        set_ignition_relay(1, 1);
-        //SRV_Channels::set_output_pwm(SRV_Channel::k_ignition, pwm_ignition_off);
+        //set_ignition_relay(1, 1);
+        SRV_Channels::set_output_pwm(SRV_Channel::k_ignition, pwm_ignition_off);
         SRV_Channels::set_output_pwm(SRV_Channel::k_starter,  pwm_starter_off);
         starter_start_time_ms = 0;
         break;
 
     case ICE_START_HEIGHT_DELAY:
     case ICE_START_DELAY:
-        set_ignition_relay(1, 0);
-        //SRV_Channels::set_output_pwm(SRV_Channel::k_ignition, pwm_ignition_on);
+        //set_ignition_relay(1, 0);
+        SRV_Channels::set_output_pwm(SRV_Channel::k_ignition, pwm_ignition_on);
         SRV_Channels::set_output_pwm(SRV_Channel::k_starter,  pwm_starter_off);
         break;
 
     case ICE_STARTING:
-        set_ignition_relay(1, 0);
-        //SRV_Channels::set_output_pwm(SRV_Channel::k_ignition, pwm_ignition_on);
+        //set_ignition_relay(1, 0);
+        SRV_Channels::set_output_pwm(SRV_Channel::k_ignition, pwm_ignition_on);
         SRV_Channels::set_output_pwm(SRV_Channel::k_starter,  pwm_starter_on);
         if (starter_start_time_ms == 0) {
             starter_start_time_ms = now;
@@ -316,8 +316,8 @@ void AP_ICEngine::update(void)
         break;
 
     case ICE_RUNNING:
-        set_ignition_relay(1, 0);
-        //SRV_Channels::set_output_pwm(SRV_Channel::k_ignition, pwm_ignition_on);
+        //set_ignition_relay(1, 0);
+        SRV_Channels::set_output_pwm(SRV_Channel::k_ignition, pwm_ignition_on);
         SRV_Channels::set_output_pwm(SRV_Channel::k_starter,  pwm_starter_off);
         starter_start_time_ms = 0;
         break;

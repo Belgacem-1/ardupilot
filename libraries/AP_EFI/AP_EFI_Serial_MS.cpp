@@ -21,10 +21,10 @@
 
 extern const AP_HAL::HAL &hal;
 
-AP_EFI_Serial_MS::AP_EFI_Serial_MS(AP_EFI &_frontend, uint8_t _instance):
-    AP_EFI_Backend(_frontend, _instance)
+AP_EFI_Serial_MS::AP_EFI_Serial_MS(AP_EFI &_frontend, EFI_State &_state, uint8_t _instance):
+    AP_EFI_Backend(_frontend, _state, _instance)
 {
-    internal_state.estimated_consumed_fuel_volume_cm3 = 0; // Just to be sure
+    state.estimated_consumed_fuel_volume_cm3 = 0; // Just to be sure
     port = AP::serialmanager().find_serial(AP_SerialManager::SerialProtocol_EFI_MS, 0);
 }
 
@@ -85,60 +85,60 @@ bool AP_EFI_Serial_MS::read_incoming_realtime_data()
         float temp_float;
         switch (offset) {
             case PW1_MSB:
-                internal_state.cylinder_status[0].injection_time_ms = (float)((data << 8) + read_byte_CRC32())/1000.0f;
+                state.cylinder_status[0].injection_time_ms = (float)((data << 8) + read_byte_CRC32())/1000.0f;
                 offset++;  // increment the counter because we read a byte in the previous line
                 break;
             case RPM_MSB:
                 // Read 16 bit RPM
-                internal_state.engine_speed_rpm = (data << 8) + read_byte_CRC32();
+                state.engine_speed_rpm = (data << 8) + read_byte_CRC32();
                 offset++;
                 break;
             case ADVANCE_MSB:
-                internal_state.cylinder_status[0].ignition_timing_deg = (float)((data << 8) + read_byte_CRC32())/10.0f;
+                state.cylinder_status[0].ignition_timing_deg = (float)((data << 8) + read_byte_CRC32())/10.0f;
                 offset++;
                 break;
             case ENGINE_BM:
                 break;
             case BAROMETER_MSB:
-                internal_state.atmospheric_pressure_kpa = (float)((data << 8) + read_byte_CRC32())/10.0f;
+                state.atmospheric_pressure_kpa = (float)((data << 8) + read_byte_CRC32())/10.0f;
                 offset++;
                 break;
             case MAP_MSB:
-                internal_state.intake_manifold_pressure_kpa = (float)((data << 8) + read_byte_CRC32())/10.0f;
+                state.intake_manifold_pressure_kpa = (float)((data << 8) + read_byte_CRC32())/10.0f;
                 offset++;
                 break;
             case MAT_MSB:
                 temp_float = (float)((data << 8) + read_byte_CRC32())/10.0f;
                 offset++;
-                internal_state.intake_manifold_temperature = f_to_k(temp_float);
+                state.intake_manifold_temperature = f_to_k(temp_float);
                 break;
             case CHT_MSB:
                 temp_float = (float)((data << 8) + read_byte_CRC32())/10.0f;
                 offset++;
-                internal_state.cylinder_status[0].cylinder_head_temperature = f_to_k(temp_float);
+                state.cylinder_status[0].cylinder_head_temperature = f_to_k(temp_float);
                 break;
             case TPS_MSB:
                 temp_float = (float)((data << 8) + read_byte_CRC32())/10.0f;
                 offset++;
-                internal_state.throttle_position_percent = roundf(temp_float);
+                state.throttle_position_percent = roundf(temp_float);
                 break;
             case AFR1_MSB:
                 temp_float = (float)((data << 8) + read_byte_CRC32())/10.0f;
                 offset++;
-                internal_state.cylinder_status[0].lambda_coefficient = temp_float;
+                state.cylinder_status[0].lambda_coefficient = temp_float;
                 break;
             case DWELL_MSB:
                 temp_float = (float)((data << 8) + read_byte_CRC32())/10.0f;
-                internal_state.spark_dwell_time_ms = temp_float;
+                state.spark_dwell_time_ms = temp_float;
                 offset++;
                 break;
             case LOAD:
-                internal_state.engine_load_percent = data;
+                state.engine_load_percent = data;
                 break;
             case FUEL_PRESSURE_MSB:
                 // MS Fuel Pressure is unitless, store as KPA anyway
                 temp_float = (float)((data << 8) + read_byte_CRC32());
-                internal_state.fuel_pressure = temp_float;
+                state.fuel_pressure = temp_float;
                 offset++;
                 break;   
                 
@@ -159,17 +159,17 @@ bool AP_EFI_Serial_MS::read_incoming_realtime_data()
 
     // Calculate Fuel Consumption 
     // Duty Cycle (Percent, because that's how HFE gives us the calibration coefficients)
-    float duty_cycle = (internal_state.cylinder_status[0].injection_time_ms * internal_state.engine_speed_rpm)/600.0f;
+    float duty_cycle = (state.cylinder_status[0].injection_time_ms * state.engine_speed_rpm)/600.0f;
     uint32_t current_time = AP_HAL::millis();
     // Super Simplified integration method - Error Analysis TBD
     // This calcualtion gives erroneous results when the engine isn't running
-    if (internal_state.engine_speed_rpm > RPM_THRESHOLD) {
-        internal_state.fuel_consumption_rate_cm3pm = duty_cycle*get_coef1() - get_coef2();
-        internal_state.estimated_consumed_fuel_volume_cm3 += internal_state.fuel_consumption_rate_cm3pm * (current_time - internal_state.last_updated_ms)/60000.0f;
+    if (state.engine_speed_rpm > RPM_THRESHOLD) {
+        state.fuel_consumption_rate_cm3pm = duty_cycle*get_coef1() - get_coef2();
+        state.estimated_consumed_fuel_volume_cm3 += state.fuel_consumption_rate_cm3pm * (current_time - state.last_updated_ms)/60000.0f;
     } else {
-        internal_state.fuel_consumption_rate_cm3pm = 0;
+        state.fuel_consumption_rate_cm3pm = 0;
     }
-    internal_state.last_updated_ms = current_time;
+    state.last_updated_ms = current_time;
     
     return true;
          
