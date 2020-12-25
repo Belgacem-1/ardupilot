@@ -17,24 +17,14 @@
 #include "AP_EFI_Serial_Fiala.h"
 #include <stdio.h>
 #if EFI_ENABLED
-#include <AP_SerialManager/AP_SerialManager.h>
 
 extern const AP_HAL::HAL &hal;
 
-AP_EFI_Serial_Fiala::AP_EFI_Serial_Fiala(AP_EFI &_frontend, EFI_State &_state, uint8_t _instance):
-    AP_EFI_Backend(_frontend, _state, _instance)
+bool AP_EFI_Serial_Fiala::get_reading()
 {
-    printf("Motor %u enabled\n", _instance);
-    state.estimated_consumed_fuel_volume_cm3 = 0; // Just to be sure
-    port = AP::serialmanager().find_serial(AP_SerialManager::SerialProtocol_Fiala_EM, 0);
-}
-
-
-void AP_EFI_Serial_Fiala::update()
-{
-    if (!port) {
-		printf("port not available befor\n");
-        return;
+    if (port==nullptr) {
+		printf("port not available before\n");
+        return false;
     }
 
     uint32_t now = AP_HAL::millis();
@@ -42,16 +32,18 @@ void AP_EFI_Serial_Fiala::update()
     const uint32_t expected_bytes = 2 + (RT_LAST_OFFSET - RT_FIRST_OFFSET) + 4;
     if (port->available() >= expected_bytes && read_incoming_realtime_data()) {
         last_response_ms = now;
-        copy_to_frontend();
     }
 
     if (port->available() == 0 || now - last_response_ms > 200) {
 		printf("now-last_response_ms= %u",now - last_response_ms);
 		printf("port not available after\n");
         port->discard_input();
+        return false;
     }
+    return true;
 }
 
+// read - return last value measured by sensor
 bool AP_EFI_Serial_Fiala::read_incoming_realtime_data() 
 {
     // Data is parsed directly from the buffer, otherwise we would need to allocate

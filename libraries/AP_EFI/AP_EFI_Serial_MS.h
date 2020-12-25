@@ -24,13 +24,12 @@ class AP_EFI_Serial_MS: public AP_EFI_Backend {
     
 public:
     // Constructor with initialization
-    AP_EFI_Serial_MS(AP_EFI &_frontend, EFI_State &_state, uint8_t _instance);
+    AP_EFI_Serial_MS(EFI_State &_state);
 
     // Update the state structure
     void update() override;
 
 private:
-    AP_HAL::UARTDriver *port;
     void parse_realtime_data();
     bool read_incoming_realtime_data();
     void send_request(uint8_t table, uint16_t first_offset, uint16_t last_offset);

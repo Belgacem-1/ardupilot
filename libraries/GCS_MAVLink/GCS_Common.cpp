@@ -4799,15 +4799,15 @@ bool GCS_MAVLINK::try_send_message(const enum ap_message id)
     }
 
     case MSG_EFI2_STATUS: {
-//#if EFI_MAX_INSTANCES > 1
+#if EFI_MAX_INSTANCES > 1
         CHECK_PAYLOAD_SIZE(EFI2_STATUS);
         AP_EFI *efi = AP::EFI();
         if (efi) {
             efi->send_mavlink_efi2_status(chan);
         }
-//#endif
+#endif
         break;
-    }//*/
+    }
 
     case MSG_WINCH_STATUS:
         CHECK_PAYLOAD_SIZE(WINCH_STATUS);

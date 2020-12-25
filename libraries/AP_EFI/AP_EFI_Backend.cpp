@@ -21,17 +21,36 @@
 
 extern const AP_HAL::HAL &hal;
 
-AP_EFI_Backend::AP_EFI_Backend(AP_EFI &_frontend, EFI_State &_state, uint8_t _instance) :
-    frontend(_frontend),
-    state(_state),
-    instance(_instance)
+AP_EFI_Backend::AP_EFI_Backend(EFI_State &_state) : state(_state)
 {
 }
 
-void AP_EFI_Backend::copy_to_frontend() 
+// update status based on rpm measurement
+void AP_EFI_Backend::update_status()
 {
-    WITH_SEMAPHORE(sem);
-    //frontend.state[instance] = internal_state;
+    // check distance
+    if ((int16_t)state.distance_cm > params.max_distance_cm) {
+        set_status(Status::OutOfRangeHigh);
+    } else if ((int16_t)state.distance_cm < params.min_distance_cm) {
+        set_status(Status::OutOfRangeLow);
+    } else {
+        set_status(Status::Good);
+    }
+}
+
+// set status and update valid count
+void AP_EFI_Backend::set_status(Status _status)
+{
+    state.status = _status;
+
+    // update valid count
+    if (_status == Status::Good) {
+        if (state.range_valid_count < 10) {
+            state.range_valid_count++;
+        }
+    } else {
+        state.range_valid_count = 0;
+    }
 }
 
 float AP_EFI_Backend::get_coef1(void) const

@@ -31,6 +31,14 @@
  *
  ***************/
 
+enum class Status : uint8_t {
+    NotConnected = 0,
+    NoData,
+    OutOfRangeLow,
+    OutOfRangeHigh,
+    Good
+};
+
 enum class Engine_State : uint8_t {
     STOPPED  = 0,
     STARTING = 1,
@@ -127,7 +135,9 @@ struct Cylinder_Status {
 struct EFI_State {
     // When this structure was last updated (milliseconds)
     uint32_t last_updated_ms;
-
+    // ECU state
+    Status status;
+    
     // Current overall engine state
     Engine_State engine_state;
  

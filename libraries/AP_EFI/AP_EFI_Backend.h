@@ -23,7 +23,7 @@ class AP_EFI; //forward declaration
 class AP_EFI_Backend {
 public:    
     // Constructor with initialization
-    AP_EFI_Backend(AP_EFI &_frontend, EFI_State &_state, uint8_t _instance);
+    AP_EFI_Backend(EFI_State &_state);
 
     // Virtual destructor that efi backends can override 
     virtual ~AP_EFI_Backend(void) {}
@@ -32,21 +32,16 @@ public:
     virtual void update() = 0;
 
 protected:
-    // Copies internal state to the frontend state
-    void copy_to_frontend();
 
-    // Semaphore for access to shared frontend data
-    HAL_Semaphore sem;
+    // update status based on rpm measurment
+    void update_status();
 
-    // Internal state for this driver (before copying to frontend)
-    EFI_State internal_state;
+    // set status and update valid_count
+    void set_status(Status status);
+    
     EFI_State &state;
 
     int8_t get_uavcan_node_id(void) const;
     float get_coef1(void) const;
     float get_coef2(void) const;
-
-private:
-    AP_EFI &frontend; 
-    uint8_t instance;
 };

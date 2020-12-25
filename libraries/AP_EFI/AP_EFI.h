@@ -91,13 +91,13 @@ protected:
     // Back end Parameters
     AP_Float coef1;
     AP_Float coef2;
+    AP_Int8 type[EFI_MAX_INSTANCES];
 
     EFI_State state[EFI_MAX_INSTANCES];
 
 private:
-    // Front End Parameters
-    AP_Int8 type[EFI_MAX_INSTANCES];
 
+    HAL_Semaphore sem;
     // Tracking backends
     AP_EFI_Backend *backend[EFI_MAX_INSTANCES];
     static AP_EFI *singleton;

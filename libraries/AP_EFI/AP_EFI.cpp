@@ -50,15 +50,15 @@ const AP_Param::GroupInfo AP_EFI::var_info[] = {
     // @RebootRequired: False
     AP_GROUPINFO("_COEF2", 3, AP_EFI, coef2, 0),
 
-//#if EFI_MAX_INSTANCES > 1
+#if EFI_MAX_INSTANCES > 1
     // @Param: 2_TYPE
     // @DisplayName: Second EFI communication type
     // @Description: What method of communication is used for EFI #2
     // @Values: 0:None,1:Serial-MS,2:Fiala-EM
     // @User: Advanced
     // @RebootRequired: True
-    AP_GROUPINFO_FLAGS("_TYPE", 4, AP_EFI, type[1], 2, AP_PARAM_FLAG_ENABLE),
-//#endif
+    AP_GROUPINFO_FLAGS("2_TYPE", 4, AP_EFI, type[1], 0, AP_PARAM_FLAG_ENABLE),
+#endif
 
     AP_GROUPEND
 };
@@ -75,21 +75,22 @@ AP_EFI::AP_EFI()
 // Initialize backends based on existing params
 void AP_EFI::init(void)
 {
-    source = hal.analogin->channel(15);
+    source = hal.analogin->channel(4);
     printf("EFI init\n");
     if (num_instances != 0) {
         // init called a 2nd time?
         return;
     }
     for (uint8_t i=0; i<EFI_MAX_INSTANCES; i++) {
+        WITH_SEMAPHORE(sem);
         // Check for MegaSquirt Serial EFI
         if (type[i] == EFI_COMMUNICATION_TYPE_SERIAL_MS) {
            backend[i] = new AP_EFI_Serial_MS(*this, state[i], i);
         }
         // Check for Fiala EM
-        if (type[i] == EFI_COMMUNICATION_TYPE_SERIAL_FIALA) {
+        if (AP_EFI_Serial_Fiala::detect(i) && type[i] == EFI_COMMUNICATION_TYPE_SERIAL_FIALA) {
 		   printf("Fiala instance %u\n",i);
-           backend[i] = new AP_EFI_Serial_Fiala(*this, state[i], i);
+           backend[i] = new AP_EFI_Serial_Fiala(state[i], i);
         }
         if (backend[i] != nullptr) {
             // we loaded a driver for this instance, so it must be
@@ -122,7 +123,7 @@ bool AP_EFI::get_fuel_level(float &tfl)
         return false;
     }
     // allow pin to change
-    source->set_pin(15);
+    source->set_pin(4);
     tfl = source->voltage_average_ratiometric() * VOLTS_TO_LITER;
     return true;
 }
@@ -264,7 +265,7 @@ void AP_EFI::send_mavlink_efi_status(mavlink_channel_t chan)
         state[0].servo_voltage);
 }
 
-//#if EFI_MAX_INSTANCES > 1
+#if EFI_MAX_INSTANCES > 1
 void AP_EFI::send_mavlink_efi2_status(mavlink_channel_t chan)
 {
     if (!backend) {
@@ -285,7 +286,7 @@ void AP_EFI::send_mavlink_efi2_status(mavlink_channel_t chan)
         state[1].input_voltage,
         state[1].servo_voltage);
 }
-//#endif
+#endif
 namespace AP {
 AP_EFI *EFI()
 {
