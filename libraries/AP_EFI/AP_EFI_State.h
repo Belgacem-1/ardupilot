@@ -134,7 +134,7 @@ struct Cylinder_Status {
 // All backends are required to fill in this state structure
 struct EFI_State {
     // When this structure was last updated (milliseconds)
-    uint32_t last_updated_ms;
+    uint32_t last_reading_ms;
     // ECU state
     Status status;
     
@@ -155,6 +155,8 @@ struct EFI_State {
 
     // Engine load (percent)
     uint8_t engine_load_percent;
+
+    uint8_t  range_valid_count;     // number of consecutive valid readings (maxes out at 10)
     
     // Engine speed (revolutions per minute)
     uint32_t engine_speed_rpm;
@@ -192,17 +194,17 @@ struct EFI_State {
     // Fuel tank level (liter)
     float fuel_tank_level;
 
-    // Fuel pressure (kilopascal)
+    // Fuel pressure (bar)
     float fuel_pressure;
 
     // Instant fuel consumption estimate, which 
     // should be low-pass filtered in order to prevent aliasing effects.
     // (centimeter^3)/minute.
-    float fuel_consumption_rate_cm3pm;
+    float fuel_consumption_rate;
 
     // Estimate of the consumed fuel since the start of the engine (centimeter^3)
     // This variable is reset when the engine is stopped.
-    float estimated_consumed_fuel_volume_cm3;
+    float estimated_consumed_fuel;
 
     // Throttle position (percent)
     uint16_t throttle_position_percent;

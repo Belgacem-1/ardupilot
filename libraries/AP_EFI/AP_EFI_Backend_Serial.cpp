@@ -24,8 +24,9 @@ extern const AP_HAL::HAL& hal;
    constructor is not called until detect() returns true, so we
    already know that we should setup the rangefinder
 */
-AP_EFI_Backend_Serial::AP_EFI_Backend_Serial(EFI_State &_state, uint8_t serial_instance) : AP_EFI_Backend(_state)
+AP_EFI_Backend_Serial::AP_EFI_Backend_Serial(AP_EFI &_frontend, EFI_State &_state, uint8_t serial_instance) : AP_EFI_Backend(_frontend, _state, serial_instance)
 {
+    state.estimated_consumed_fuel = 0;
     port = AP::serialmanager().find_serial(AP_SerialManager::SerialProtocol_Fiala_EM, serial_instance);
     if (port != nullptr) {
         port->begin(initial_baudrate(serial_instance), rx_bufsize(), tx_bufsize());
@@ -53,10 +54,10 @@ bool AP_EFI_Backend_Serial::detect(uint8_t serial_instance)
 void AP_EFI_Backend_Serial::update(void)
 {
     if (get_reading()) {
-        // update range_valid state based on distance measured
-        state.last_updated_ms = AP_HAL::millis();
+        // update range_valid state based on rpm measured
+        state.last_reading_ms = AP_HAL::millis();
         update_status();
-    } else if (AP_HAL::millis() - state.last_updated_ms > read_timeout_ms()) {
+    } else if (AP_HAL::millis() - state.last_reading_ms > read_timeout_ms()) {
         set_status(Status::NoData);
     }
 }

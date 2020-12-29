@@ -24,7 +24,7 @@ class AP_EFI_Serial_MS: public AP_EFI_Backend {
     
 public:
     // Constructor with initialization
-    AP_EFI_Serial_MS(EFI_State &_state);
+    AP_EFI_Serial_MS(AP_EFI &_frontend, EFI_State &_state, uint8_t serial_instance);
 
     // Update the state structure
     void update() override;

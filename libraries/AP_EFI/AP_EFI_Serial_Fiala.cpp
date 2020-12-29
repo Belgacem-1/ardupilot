@@ -115,12 +115,12 @@ bool AP_EFI_Serial_Fiala::read_incoming_realtime_data()
             case FP_MSB:
                 // Fiala Fuel Pressure is unitless, store as bar anyway
                 temp_float = (float)(data + (read_byte()<< 8))/10.0f;
-                state.intake_manifold_pressure_kpa = temp_float;
+                state.fuel_pressure = temp_float;
                 offset++;
                 break;
             case FCR_MSB:
                 temp_float = (float)(data + (read_byte()<< 8))/100.0f;
-                state.fuel_consumption_rate_cm3pm = temp_float;
+                state.fuel_consumption_rate = temp_float;
                 offset++;
                 break; 
             case IL_MSB:
@@ -146,9 +146,11 @@ bool AP_EFI_Serial_Fiala::read_incoming_realtime_data()
     // Super Simplified integration method - Error Analysis TBD
     // This calcualtion gives erroneous results when the engine isn't running
     if (state.engine_speed_rpm > RPM_THRESHOLD) {
-        state.estimated_consumed_fuel_volume_cm3 += state.fuel_consumption_rate_cm3pm * (current_time - state.last_updated_ms)/60000.0f;
+        state.estimated_consumed_fuel += state.fuel_consumption_rate * (current_time - state.last_reading_ms)/3600000.0f;
     }
-    state.last_updated_ms = current_time;
+    else {
+        state.fuel_consumption_rate = 0;
+    }
     
     return true;
          

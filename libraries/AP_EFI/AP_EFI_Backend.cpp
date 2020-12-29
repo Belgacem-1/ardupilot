@@ -12,26 +12,43 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
+#include <AP_Common/AP_Common.h>
+#include <AP_HAL/AP_HAL.h>
 #include "AP_EFI.h"
 
 #if EFI_ENABLED
 
 #include "AP_EFI_Backend.h"
 
+
 extern const AP_HAL::HAL &hal;
 
-AP_EFI_Backend::AP_EFI_Backend(EFI_State &_state) : state(_state)
+AP_EFI_Backend::AP_EFI_Backend(AP_EFI &_frontend, EFI_State &_state, uint8_t _instance) : frontend(_frontend), state(_state), instance(_instance)
 {
+    _backend_type = type();
+}
+
+Status AP_EFI_Backend::status() const {
+    if (type() == AP_EFI::EFI_COMMUNICATION_TYPE::EFI_COMMUNICATION_TYPE_NONE) {
+        // turned off at runtime?
+        return Status::NotConnected;
+    }
+    return state.status;
+}
+
+// true if sensor is returning data
+bool AP_EFI_Backend::has_data() const {
+    return ((state.status != Status::NotConnected) &&
+            (state.status != Status::NoData));
 }
 
 // update status based on rpm measurement
 void AP_EFI_Backend::update_status()
 {
-    // check distance
-    if ((int16_t)state.distance_cm > params.max_distance_cm) {
+    // check rpm
+    if ((int16_t)state.engine_speed_rpm > 7000) {
         set_status(Status::OutOfRangeHigh);
-    } else if ((int16_t)state.distance_cm < params.min_distance_cm) {
+    } else if ((int16_t)state.engine_speed_rpm < 100) {
         set_status(Status::OutOfRangeLow);
     } else {
         set_status(Status::Good);

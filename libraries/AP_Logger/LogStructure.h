@@ -55,11 +55,12 @@ const struct UnitStructure log_Units[] = {
     { 'h', "degheading" },    // 0.? to 359.?
     { 'i', "A.s" },           // Ampere second
     { 'J', "W.s" },           // Joule (Watt second)
-    // { 'l', "l" },          // litres
+    { 'l', "l" },             // litre
+    { 'c', "l/h"},            // litre per hour
     { 'L', "rad/s/s" },       // radians per second per second
     { 'm', "m" },             // metres
     { 'n', "m/s" },           // metres per second
-    // { 'N', "N" },          // Newton
+    { 'N', "N" },             // Newton
     { 'o', "m/s/s" },         // metres per second per second
     { 'O', "degC" },          // degrees Celsius. Not SI, but Kelvin is too cumbersome for most users
     { '%', "%" },             // percent
@@ -72,7 +73,7 @@ const struct UnitStructure log_Units[] = {
     { 'v', "V" },             // Volt
     { 'P', "Pa" },            // Pascal
     { 'w', "Ohm" },           // Ohm
-    { 'W', "Watt" },        // Watt
+    { 'W', "Watt" },          // Watt
     { 'Y', "us" },            // pulse width modulation in microseconds
     { 'z', "Hz" },            // Hertz
     { '#', "instance" }       // (e.g.)Sensor instance number
@@ -867,6 +868,25 @@ struct PACKED log_RFND {
     uint16_t dist;
     uint8_t status;
     uint8_t orient;
+};
+
+struct PACKED log_EFI {
+    LOG_PACKET_HEADER;
+    uint64_t time_us;
+    uint8_t instance;
+    uint32_t rpm;
+    uint8_t status;
+    uint8_t ecu_index;
+    uint8_t tps;
+    float cht1;
+    float cht2;
+    uint8_t injection_length;
+    float input_voltage; 
+    float servo_voltage;
+    float fuel_pressure;
+    float fuel_cons_rate;
+    float est_cons_fuel;
+    float fuel_tank_level;
 };
 
 /*
@@ -2077,6 +2097,24 @@ struct PACKED log_PSC {
 // @Field: Stat: Sensor state
 // @Field: Orient: Sensor orientation
 
+// @LoggerMessage: EFI
+// @Description: EFI information
+// @Field: TimeUS: Time since system startup
+// @Field: Instance: EFI instance number this data is from
+// @Field: Rpm: Reported rpm from EFI
+// @Field: Stat: EFI state
+// @Field: EcuI: ECU index
+// @Field: Tps: Throttle position 
+// @Field: Cht1: Cylinder head temperature 1
+// @Field: Cht2: Cylinder head temperature 2
+// @Field: InjL: Injection lenght
+// @Field: InV: Input voltage 
+// @Field: SeV: Servo voltage
+// @Field: FuP: Fuel pressure
+// @Field: FuCR: Fuel consumption rate 
+// @Field: EsCFu: Estimated consumed fuel
+// @Field: FuTL: Fuel tank level
+
 // @LoggerMessage: RPM
 // @Description: Data from RPM sensors
 // @Field: TimeUS: Time since system startup
@@ -2478,6 +2516,8 @@ struct PACKED log_PSC {
       "MODE", "QMBB",         "TimeUS,Mode,ModeNum,Rsn", "s---", "F---" }, \
     { LOG_RFND_MSG, sizeof(log_RFND), \
       "RFND", "QBCBB", "TimeUS,Instance,Dist,Stat,Orient", "s#m--", "F-B--" }, \
+    { LOG_EFI_MSG,  sizeof(log_EFI), \
+      "EFI", "QBCBB", "TimeUS,Instance,Rpm,Stat,EcuI,Tps,Cht1,Cht2,InjL,InV,SeV,FuP,FuCR,EsCFu,FuTL", "s#q--%OOsvvPcll", "F-------F--E---" }, \
     { LOG_MAV_STATS, sizeof(log_MAV_Stats), \
       "DMS", "QIIIIBBBBBBBBB",         "TimeUS,N,Dp,RT,RS,Fa,Fmn,Fmx,Pa,Pmn,Pmx,Sa,Smn,Smx", "s-------------", "F-------------" }, \
     { LOG_BEACON_MSG, sizeof(log_Beacon), \
@@ -2719,6 +2759,7 @@ enum LogMessages : uint8_t {
     LOG_RPM_MSG,
     LOG_GPA_MSG,
     LOG_RFND_MSG,
+    LOG_EFI_MSG,
     LOG_MAV_STATS,
     LOG_FORMAT_UNITS_MSG,
     LOG_UNIT_MSG,

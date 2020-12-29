@@ -21,10 +21,10 @@
 
 extern const AP_HAL::HAL &hal;
 
-AP_EFI_Serial_MS::AP_EFI_Serial_MS(EFI_State &_state):
-    AP_EFI_Backend(_state)
+AP_EFI_Serial_MS::AP_EFI_Serial_MS(AP_EFI &_frontend, EFI_State &_state, uint8_t serial_instance):
+    AP_EFI_Backend(_frontend, _state, serial_instance)
 {
-    state.estimated_consumed_fuel_volume_cm3 = 0; // Just to be sure
+    state.estimated_consumed_fuel = 0; // Just to be sure
     port = AP::serialmanager().find_serial(AP_SerialManager::SerialProtocol_EFI_MS, 0);
 }
 
@@ -40,7 +40,7 @@ void AP_EFI_Serial_MS::update()
     const uint32_t expected_bytes = 2 + (RT_LAST_OFFSET - RT_FIRST_OFFSET) + 4;
     if (port->available() >= expected_bytes && read_incoming_realtime_data()) {
         last_response_ms = now;
-        copy_to_frontend();
+        //copy_to_frontend();
     }
 
     if (port->available() == 0 || now - last_response_ms > 200) {
@@ -164,12 +164,12 @@ bool AP_EFI_Serial_MS::read_incoming_realtime_data()
     // Super Simplified integration method - Error Analysis TBD
     // This calcualtion gives erroneous results when the engine isn't running
     if (state.engine_speed_rpm > RPM_THRESHOLD) {
-        state.fuel_consumption_rate_cm3pm = duty_cycle*get_coef1() - get_coef2();
-        state.estimated_consumed_fuel_volume_cm3 += state.fuel_consumption_rate_cm3pm * (current_time - state.last_updated_ms)/60000.0f;
+        state.fuel_consumption_rate = duty_cycle*get_coef1() - get_coef2();
+        state.estimated_consumed_fuel += state.fuel_consumption_rate * (current_time - state.last_reading_ms)/60000.0f;
     } else {
-        state.fuel_consumption_rate_cm3pm = 0;
+        state.fuel_consumption_rate = 0;
     }
-    state.last_updated_ms = current_time;
+    state.last_reading_ms = current_time;
     
     return true;
          

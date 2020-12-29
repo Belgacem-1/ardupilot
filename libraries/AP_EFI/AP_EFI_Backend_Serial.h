@@ -6,7 +6,7 @@ class AP_EFI_Backend_Serial : public AP_EFI_Backend
 {
 public:
     // constructor
-    AP_EFI_Backend_Serial(EFI_State &_state, uint8_t serial_instance);
+    AP_EFI_Backend_Serial(AP_EFI &_frontend, EFI_State &_state, uint8_t serial_instance);
 
     // static detection function
     static bool detect(uint8_t serial_instance);

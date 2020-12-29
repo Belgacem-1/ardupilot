@@ -32,7 +32,7 @@ const AP_Param::GroupInfo AP_EFI::var_info[] = {
     // @Values: 0:None,1:Serial-MS,2:Serial-fiala
     // @User: Advanced
     // @RebootRequired: True
-    AP_GROUPINFO_FLAGS("_TYPE", 1, AP_EFI, type[0], 0, AP_PARAM_FLAG_ENABLE),
+    AP_GROUPINFO_FLAGS("_TYPE", 1, AP_EFI, param[0].type, 0, AP_PARAM_FLAG_ENABLE),
 
     // @Param: _COEF1
     // @DisplayName: EFI Calibration Coefficient 1
@@ -50,6 +50,28 @@ const AP_Param::GroupInfo AP_EFI::var_info[] = {
     // @RebootRequired: False
     AP_GROUPINFO("_COEF2", 3, AP_EFI, coef2, 0),
 
+    // @Param: ORIENT
+    // @DisplayName: EFI orientation
+    // @Description: Orientation of efi
+    // @Values: 0:Forward, 1:Forward-Right, 2:Right, 3:Back-Right, 4:Back, 5:Back-Left, 6:Left, 7:Forward-Left, 24:Up, 25:Down
+    // @User: Advanced
+    // @RebootRequired: False
+    AP_GROUPINFO("ORIENT", 4, AP_EFI, param[0].orientation, ROTATION_PITCH_270),
+
+    // @Param: _INDEX
+    // @DisplayName: ECU index
+    // @Description: Used to identify the reference of ecu
+    // @User: Standard
+    // @RebootRequired: False
+    AP_GROUPINFO("_INDEX", 5, AP_EFI, param[0].index, 0),
+
+    // @Param: _RATIO
+    // @DisplayName: fuel tank level ratio
+    // @Description: Calibrate fuel tank level sensor volt to liter. Increasing this value will indicate a higher fuel quantity at any given dynamic level.
+    // @Increment: 0.1
+    // @User: Advanced
+    AP_GROUPINFO("_RATIO",  6, AP_EFI, ratio, 3.49f),
+
 #if EFI_MAX_INSTANCES > 1
     // @Param: 2_TYPE
     // @DisplayName: Second EFI communication type
@@ -57,8 +79,22 @@ const AP_Param::GroupInfo AP_EFI::var_info[] = {
     // @Values: 0:None,1:Serial-MS,2:Fiala-EM
     // @User: Advanced
     // @RebootRequired: True
-    AP_GROUPINFO_FLAGS("2_TYPE", 4, AP_EFI, type[1], 0, AP_PARAM_FLAG_ENABLE),
+    AP_GROUPINFO_FLAGS("2_TYPE", 7, AP_EFI, param[1].type, 0, AP_PARAM_FLAG_ENABLE),
 #endif
+    // @Param: 2_ORIENT
+    // @DisplayName: EFI orientation
+    // @Description: Orientation of efi
+    // @Values: 0:Forward, 1:Forward-Right, 2:Right, 3:Back-Right, 4:Back, 5:Back-Left, 6:Left, 7:Forward-Left, 24:Up, 25:Down
+    // @User: Advanced
+    // @RebootRequired: False
+    AP_GROUPINFO("2_ORIENT", 8, AP_EFI, param[1].orientation, ROTATION_PITCH_270),
+
+    // @Param: 2_INDEX
+    // @DisplayName: ECU index
+    // @Description: Used to identify the reference of ecu
+    // @User: Standard
+    // @RebootRequired: False
+    AP_GROUPINFO("2_INDEX", 9, AP_EFI, param[1].index, 0),
 
     AP_GROUPEND
 };
@@ -83,20 +119,31 @@ void AP_EFI::init(void)
     }
     for (uint8_t i=0; i<EFI_MAX_INSTANCES; i++) {
         WITH_SEMAPHORE(sem);
-        // Check for MegaSquirt Serial EFI
-        if (type[i] == EFI_COMMUNICATION_TYPE_SERIAL_MS) {
-           backend[i] = new AP_EFI_Serial_MS(*this, state[i], i);
+        const EFI_Communication_Type _type = (EFI_Communication_Type)param[i].type.get();
+        switch (_type) {
+            case EFI_COMMUNICATION_TYPE_NONE:
+                // nothing to do
+                break;
+            case EFI_COMMUNICATION_TYPE_SERIAL_MS:
+                drivers[i] = new AP_EFI_Serial_MS(*this, state[i], i);
+                break;
+            case EFI_COMMUNICATION_TYPE_SERIAL_FIALA:
+                // Check for Fiala EM
+                if (AP_EFI_Serial_Fiala::detect(i)) {
+		            printf("Fiala instance %u\n",i);
+                    drivers[i] = new AP_EFI_Serial_Fiala(*this, state[i], i);
+                }
+                break;
         }
-        // Check for Fiala EM
-        if (AP_EFI_Serial_Fiala::detect(i) && type[i] == EFI_COMMUNICATION_TYPE_SERIAL_FIALA) {
-		   printf("Fiala instance %u\n",i);
-           backend[i] = new AP_EFI_Serial_Fiala(state[i], i);
-        }
-        if (backend[i] != nullptr) {
+
+        if (drivers[i] != nullptr) {
             // we loaded a driver for this instance, so it must be
             // present (although it may not be healthy)
             num_instances = i+1; // num_instances is a high-water-mark
         }
+        // initialise status
+        state[i].status = Status::NotConnected;
+        state[i].range_valid_count = 0;
     } 
 }
 
@@ -104,17 +151,102 @@ void AP_EFI::init(void)
 void AP_EFI::update()
 {
     for (uint8_t i=0; i<num_instances; i++) {
-        if (backend[i]) {
-		   printf("EFI update %u\n",i);
-           backend[i]->update();
-           log_status(i);
+        if (drivers[i]) {
+           if(type[i] != EFI_COMMUNICATION_TYPE_NONE){
+                // allow user to disable a rangefinder at runtime
+                state[i].status = Status::NotConnected;
+                state[i].range_valid_count = 0;
+                continue;
+            }
         }
-    }   
+		   printf("EFI update %u\n",i);
+           drivers[i]->update();
+           //log_status(i);
+    }
+    log_efi(); 
+}  
+
+AP_EFI_Backend *AP_EFI::get_backend(uint8_t id) const {
+    if (id >= num_instances) {
+        return nullptr;
+    }
+    if (drivers[id] != nullptr) {
+        if (type[id] == EFI_COMMUNICATION_TYPE_NONE) {
+            // pretend it isn't here; disabled at runtime?
+            return nullptr;
+        }
+    }
+    return drivers[id];
+};
+
+Status AP_EFI::status_orient(enum Rotation orientation) const
+{
+    AP_EFI_Backend *backend = find_instance(orientation);
+    if (backend == nullptr) {
+        return Status::NotConnected;
+    }
+    return backend->status();
+}
+
+// return true if we have a range finder with the specified orientation
+bool AP_EFI::has_orientation(enum Rotation orientation) const
+{
+    return (find_instance(orientation) != nullptr);
+}
+
+bool AP_EFI::has_data_orient(enum Rotation orientation) const
+{
+    AP_EFI_Backend *backend = find_instance(orientation);
+    if (backend == nullptr) {
+        return false;
+    }
+    return backend->has_data();
+}
+
+uint8_t AP_EFI::range_valid_count_orient(enum Rotation orientation) const
+{
+    AP_EFI_Backend *backend = find_instance(orientation);
+    if (backend == nullptr) {
+        return 0;
+    }
+    return backend->range_valid_count();
+}
+
+uint32_t AP_EFI::last_reading_ms(enum Rotation orientation) const
+{
+    AP_EFI_Backend *backend = find_instance(orientation);
+    if (backend == nullptr) {
+        return 0;
+    }
+    return backend->last_reading_ms();
+}
+
+// find first efi instance with the specified orientation
+AP_EFI_Backend *AP_EFI::find_instance(enum Rotation orientation) const
+{
+    // first try for an efi that is in range
+    for (uint8_t i=0; i<num_instances; i++) {
+        AP_EFI_Backend *backend = get_backend(i);
+        if (backend != nullptr &&
+            backend->orientation() == orientation &&
+            backend->status() == Status::Good) {
+            return backend;
+        }
+    }
+    // if none in range then return first with correct orientation
+    for (uint8_t i=0; i<num_instances; i++) {
+        AP_EFI_Backend *backend = get_backend(i);
+        if (backend != nullptr &&
+            backend->orientation() == orientation) {
+            return backend;
+        }
+    }
+    return nullptr;
 }
 
 bool AP_EFI::is_healthy(uint8_t i) const
 {
-    return (backend[i] && (AP_HAL::millis() - state[i].last_updated_ms) < HEALTHY_LAST_RECEIVED_MS);
+    return (drivers[i] && (AP_HAL::millis() - state[i].last_updated_ms) < HEALTHY_LAST_RECEIVED_MS);
 }
 
 bool AP_EFI::get_fuel_level(float &tfl)
@@ -124,14 +256,54 @@ bool AP_EFI::get_fuel_level(float &tfl)
     }
     // allow pin to change
     source->set_pin(4);
-    tfl = source->voltage_average_ratiometric() * VOLTS_TO_LITER;
+    tfl = source->voltage_average_ratiometric() * ratio;
     return true;
+}
+
+// Write an RFND (rangefinder) packet
+void AP_EFI::log_efi()
+{
+    if (_log_efi_bit == uint32_t(-1)) {
+        return;
+    }
+
+    AP_Logger &logger = AP::logger();
+    if (!logger.should_log(_log_efi_bit)) {
+        return;
+    }
+    float fuel_level = 0;
+    for (uint8_t i=0; i<EFI_MAX_INSTANCES; i++) {
+        const AP_EFI_Backend *s = get_backend(i);
+        if (s == nullptr) {
+            continue;
+        }
+
+        const struct log_EFI pkt = {
+                LOG_PACKET_HEADER_INIT(LOG_EFI_MSG),
+                time_us           : AP_HAL::micros64(),
+                instance          : i,
+                rpm               : state[i].engine_speed_rpm,
+                status            : (uint8_t)s->status(),
+                ecu_index         : param[i].index,
+                tps               : state[i].throttle_position_percent,
+                cht1              : state[i].cylinder_status[0].cylinder_head_temperature,
+                cht2              : state[i].cylinder_status[1].cylinder_head_temperature,
+                injection_length  : state[i].cylinder_status[j].injection_time_ms,
+                input_voltage     : state[i].input_voltage,
+                servo_voltage     : state[i].servo_voltage,
+                fuel_pressure     : state[i].fuel_pressure,
+                fuel_cons_rate    : state[i].fuel_consumption_rate,
+                est_cons_fuel     : state[i].estimated_consumed_fuel,
+                fuel_tank_level   : get_fuel_level(fuel_level)?fuel_level:float(state[i].fuel_tank_level),
+        };
+        AP::logger().WriteBlock(&pkt, sizeof(pkt));
+    }
 }
 
 /*
   write status to log
  */
-void AP_EFI::log_status(uint8_t i)
+/*void AP_EFI::log_status(uint8_t i)
 {
     float fuel_level = 0;   
 // @LoggerMessage: EFI
@@ -231,14 +403,14 @@ void AP_EFI::log_status(uint8_t i)
                            state[i].cylinder_status[j].lambda_coefficient,
                            state[i].ecu_index);
     }
-}
+}*/
 
 /*
   send EFI_STATUS
  */
 void AP_EFI::send_mavlink_efi_status(mavlink_channel_t chan)
 {
-    if (!backend) {
+    if (!drivers[0]) {
         return;
     }
     printf("send mavlink message motor1\n");
@@ -247,13 +419,14 @@ void AP_EFI::send_mavlink_efi_status(mavlink_channel_t chan)
         chan,
         AP_EFI::is_healthy(0),
         state[0].ecu_index,
+        AP_HAL::micros64(),
         state[0].engine_speed_rpm,
-        state[0].estimated_consumed_fuel_volume_cm3,
-        state[0].fuel_consumption_rate_cm3pm,
+        state[0].estimated_consumed_fuel,
+        state[0].fuel_consumption_rate,
         0,
         state[0].throttle_position_percent,
         0, 0,
-        state[0].intake_manifold_pressure_kpa,
+        state[0].fuel_pressure,
         0,
         state[0].cylinder_status[0].cylinder_head_temperature,
         0,
@@ -268,18 +441,20 @@ void AP_EFI::send_mavlink_efi_status(mavlink_channel_t chan)
 #if EFI_MAX_INSTANCES > 1
 void AP_EFI::send_mavlink_efi2_status(mavlink_channel_t chan)
 {
-    if (!backend) {
+    if (!drivers[1]) {
         return;
     }
     printf("send mavlink message motor2\n");
     mavlink_msg_efi2_status_send(
         chan,
         AP_EFI::is_healthy(1),
+        state[1].ecu_index,
+        AP_HAL::micros64(),
         state[1].engine_speed_rpm,
-        state[1].estimated_consumed_fuel_volume_cm3,
-        state[1].fuel_consumption_rate_cm3pm,
+        state[1].estimated_consumed_fuel,
+        state[1].fuel_consumption_rate,
         state[1].throttle_position_percent,
-        state[1].intake_manifold_pressure_kpa,
+        state[1].fuel_pressure,
         state[1].cylinder_status[0].cylinder_head_temperature,
         state[1].cylinder_status[0].injection_time_ms,
         state[1].cylinder_status[1].cylinder_head_temperature,

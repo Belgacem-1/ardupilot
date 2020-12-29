@@ -94,6 +94,7 @@ void Plane::init_ardupilot()
 
 // init EFI monitoring
 #if EFI_ENABLED
+    g2.efi.set_log_efi_bit(MASK_LOG_EFI);
     g2.efi.init();
 #endif
 
