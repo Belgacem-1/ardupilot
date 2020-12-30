@@ -29,7 +29,7 @@ AP_EFI_Backend::AP_EFI_Backend(AP_EFI &_frontend, EFI_State &_state, uint8_t _in
 }
 
 Status AP_EFI_Backend::status() const {
-    if (type() == AP_EFI::EFI_COMMUNICATION_TYPE::EFI_COMMUNICATION_TYPE_NONE) {
+    if (type() == AP_EFI::EFI_Communication_Type::EFI_COMMUNICATION_TYPE_NONE) {
         // turned off at runtime?
         return Status::NotConnected;
     }

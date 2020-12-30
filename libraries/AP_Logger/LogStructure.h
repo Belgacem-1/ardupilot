@@ -880,7 +880,7 @@ struct PACKED log_EFI {
     uint8_t tps;
     float cht1;
     float cht2;
-    uint8_t injection_length;
+    float injection_length;
     float input_voltage; 
     float servo_voltage;
     float fuel_pressure;
@@ -2517,7 +2517,7 @@ struct PACKED log_PSC {
     { LOG_RFND_MSG, sizeof(log_RFND), \
       "RFND", "QBCBB", "TimeUS,Instance,Dist,Stat,Orient", "s#m--", "F-B--" }, \
     { LOG_EFI_MSG,  sizeof(log_EFI), \
-      "EFI", "QBCBB", "TimeUS,Instance,Rpm,Stat,EcuI,Tps,Cht1,Cht2,InjL,InV,SeV,FuP,FuCR,EsCFu,FuTL", "s#q--%OOsvvPcll", "F-------F--E---" }, \
+      "EFI", "QBIBBBfffffffff", "TimeUS,Instance,Rpm,Stat,EcuI,Tps,Cht1,Cht2,InjL,InV,SeV,FuP,FuCR,EsCFu,FuTL", "s#q--%OOsvvPcll", "F-------F--E---" }, \
     { LOG_MAV_STATS, sizeof(log_MAV_Stats), \
       "DMS", "QIIIIBBBBBBBBB",         "TimeUS,N,Dp,RT,RS,Fa,Fmn,Fmx,Pa,Pmn,Pmx,Sa,Smn,Smx", "s-------------", "F-------------" }, \
     { LOG_BEACON_MSG, sizeof(log_Beacon), \

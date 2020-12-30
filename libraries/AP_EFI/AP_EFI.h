@@ -41,8 +41,10 @@
  * Pavel Kirienko.
  * Thanks to Yonah, SpektreWorks Inc, and HFE International.
  */
+class AP_EFI_Backend;
 
-class AP_EFI {
+class AP_EFI 
+{
     friend class AP_EFI_Backend;
 public:
 
@@ -63,7 +65,7 @@ public:
     uint32_t get_rpm(uint8_t i) const { return state[i].engine_speed_rpm; }
 
     // returns enabled state of EFI
-    bool enabled(uint8_t i) const { return (enum EFI_Communication_Type )param[i].type.get() != EFI_COMMUNICATION_TYPE_NONE; }
+    bool enabled(uint8_t i) const { return (enum EFI_Communication_Type)param[i].type.get() != EFI_Communication_Type::EFI_COMMUNICATION_TYPE_NONE; }
 
     bool is_healthy(uint8_t i) const;
 

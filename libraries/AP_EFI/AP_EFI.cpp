@@ -121,13 +121,13 @@ void AP_EFI::init(void)
         WITH_SEMAPHORE(sem);
         const EFI_Communication_Type _type = (EFI_Communication_Type)param[i].type.get();
         switch (_type) {
-            case EFI_COMMUNICATION_TYPE_NONE:
+            case EFI_Communication_Type::EFI_COMMUNICATION_TYPE_NONE:
                 // nothing to do
                 break;
-            case EFI_COMMUNICATION_TYPE_SERIAL_MS:
+            case EFI_Communication_Type::EFI_COMMUNICATION_TYPE_SERIAL_MS:
                 drivers[i] = new AP_EFI_Serial_MS(*this, state[i], i);
                 break;
-            case EFI_COMMUNICATION_TYPE_SERIAL_FIALA:
+            case EFI_Communication_Type::EFI_COMMUNICATION_TYPE_SERIAL_FIALA:
                 // Check for Fiala EM
                 if (AP_EFI_Serial_Fiala::detect(i)) {
 		            printf("Fiala instance %u\n",i);
@@ -152,7 +152,7 @@ void AP_EFI::update()
 {
     for (uint8_t i=0; i<num_instances; i++) {
         if (drivers[i]) {
-           if(type[i] != EFI_COMMUNICATION_TYPE_NONE){
+           if((EFI_Communication_Type)param[i].type.get() != EFI_Communication_Type::EFI_COMMUNICATION_TYPE_NONE){
                 // allow user to disable a rangefinder at runtime
                 state[i].status = Status::NotConnected;
                 state[i].range_valid_count = 0;
@@ -171,7 +171,7 @@ AP_EFI_Backend *AP_EFI::get_backend(uint8_t id) const {
         return nullptr;
     }
     if (drivers[id] != nullptr) {
-        if (type[id] == EFI_COMMUNICATION_TYPE_NONE) {
+        if ((EFI_Communication_Type)param[id].type.get() == EFI_Communication_Type::EFI_COMMUNICATION_TYPE_NONE) {
             // pretend it isn't here; disabled at runtime?
             return nullptr;
         }
@@ -246,7 +246,7 @@ AP_EFI_Backend *AP_EFI::find_instance(enum Rotation orientation) const
 
 bool AP_EFI::is_healthy(uint8_t i) const
 {
-    return (drivers[i] && (AP_HAL::millis() - state[i].last_updated_ms) < HEALTHY_LAST_RECEIVED_MS);
+    return (drivers[i] && (AP_HAL::millis() - state[i].last_reading_ms) < HEALTHY_LAST_RECEIVED_MS);
 }
 
 bool AP_EFI::get_fuel_level(float &tfl)
@@ -282,18 +282,18 @@ void AP_EFI::log_efi()
                 LOG_PACKET_HEADER_INIT(LOG_EFI_MSG),
                 time_us           : AP_HAL::micros64(),
                 instance          : i,
-                rpm               : state[i].engine_speed_rpm,
-                status            : (uint8_t)s->status(),
-                ecu_index         : param[i].index,
-                tps               : state[i].throttle_position_percent,
-                cht1              : state[i].cylinder_status[0].cylinder_head_temperature,
-                cht2              : state[i].cylinder_status[1].cylinder_head_temperature,
-                injection_length  : state[i].cylinder_status[j].injection_time_ms,
-                input_voltage     : state[i].input_voltage,
-                servo_voltage     : state[i].servo_voltage,
-                fuel_pressure     : state[i].fuel_pressure,
-                fuel_cons_rate    : state[i].fuel_consumption_rate,
-                est_cons_fuel     : state[i].estimated_consumed_fuel,
+                rpm               : uint32_t(state[i].engine_speed_rpm),
+                status            : uint8_t(state[i].status),
+                ecu_index         : uint8_t(param[i].index),
+                tps               : uint8_t(state[i].throttle_position_percent),
+                cht1              : float(state[i].cylinder_status[0].cylinder_head_temperature),
+                cht2              : float(state[i].cylinder_status[1].cylinder_head_temperature),
+                injection_length  : float(state[i].cylinder_status[0].injection_time_ms),
+                input_voltage     : float(state[i].input_voltage),
+                servo_voltage     : float(state[i].servo_voltage),
+                fuel_pressure     : float(state[i].fuel_pressure),
+                fuel_cons_rate    : float(state[i].fuel_consumption_rate),
+                est_cons_fuel     : float(state[i].estimated_consumed_fuel),
                 fuel_tank_level   : get_fuel_level(fuel_level)?fuel_level:float(state[i].fuel_tank_level),
         };
         AP::logger().WriteBlock(&pkt, sizeof(pkt));
@@ -418,7 +418,7 @@ void AP_EFI::send_mavlink_efi_status(mavlink_channel_t chan)
     mavlink_msg_efi_status_send(
         chan,
         AP_EFI::is_healthy(0),
-        state[0].ecu_index,
+        param[0].index,
         AP_HAL::micros64(),
         state[0].engine_speed_rpm,
         state[0].estimated_consumed_fuel,
@@ -448,7 +448,7 @@ void AP_EFI::send_mavlink_efi2_status(mavlink_channel_t chan)
     mavlink_msg_efi2_status_send(
         chan,
         AP_EFI::is_healthy(1),
-        state[1].ecu_index,
+        param[1].index,
         AP_HAL::micros64(),
         state[1].engine_speed_rpm,
         state[1].estimated_consumed_fuel,

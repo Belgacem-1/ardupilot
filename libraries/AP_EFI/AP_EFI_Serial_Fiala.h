@@ -20,7 +20,7 @@
 // RPM Threshold for fuel consumption estimator
 #define RPM_THRESHOLD                100
 
-class AP_EFI_Serial_Fiala : public AP_EFI_Backend {
+class AP_EFI_Serial_Fiala : public AP_EFI_Backend_Serial {
     
 public:
 

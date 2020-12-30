@@ -21,11 +21,11 @@
 
 extern const AP_HAL::HAL &hal;
 
-AP_EFI_Serial_MS::AP_EFI_Serial_MS(AP_EFI &_frontend, EFI_State &_state, uint8_t serial_instance):
+AP_EFI_Serial_MS::AP_EFI_Serial_MS(AP_EFI &_frontend, EFI_State &_state, uint8_t serial_instance) :
     AP_EFI_Backend(_frontend, _state, serial_instance)
 {
     state.estimated_consumed_fuel = 0; // Just to be sure
-    port = AP::serialmanager().find_serial(AP_SerialManager::SerialProtocol_EFI_MS, 0);
+    port = AP::serialmanager().find_serial(AP_SerialManager::SerialProtocol_EFI_MS, serial_instance);
 }
 
 

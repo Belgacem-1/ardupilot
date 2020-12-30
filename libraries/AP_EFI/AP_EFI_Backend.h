@@ -19,7 +19,7 @@
 #include "AP_EFI.h"
 #include "AP_EFI_State.h"
 
-class AP_EFI; //forward declaration
+//class AP_EFI; //forward declaration
 
 class AP_EFI_Backend {
 public:    
