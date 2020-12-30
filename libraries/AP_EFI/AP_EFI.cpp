@@ -56,7 +56,7 @@ const AP_Param::GroupInfo AP_EFI::var_info[] = {
     // @Values: 0:Forward, 1:Forward-Right, 2:Right, 3:Back-Right, 4:Back, 5:Back-Left, 6:Left, 7:Forward-Left, 24:Up, 25:Down
     // @User: Advanced
     // @RebootRequired: False
-    AP_GROUPINFO("ORIENT", 4, AP_EFI, param[0].orientation, ROTATION_PITCH_270),
+    AP_GROUPINFO("_ORIENT", 4, AP_EFI, param[0].orientation, ROTATION_PITCH_270),
 
     // @Param: _INDEX
     // @DisplayName: ECU index
