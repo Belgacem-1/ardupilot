@@ -152,7 +152,7 @@ void AP_EFI::update()
 {
     for (uint8_t i=0; i<num_instances; i++) {
         if (drivers[i]) {
-           if((EFI_Communication_Type)param[i].type.get() != EFI_Communication_Type::EFI_COMMUNICATION_TYPE_NONE){
+           if((EFI_Communication_Type)param[i].type.get() == EFI_Communication_Type::EFI_COMMUNICATION_TYPE_NONE){
                 // allow user to disable a rangefinder at runtime
                 state[i].status = Status::NotConnected;
                 state[i].range_valid_count = 0;
@@ -419,7 +419,6 @@ void AP_EFI::send_mavlink_efi_status(mavlink_channel_t chan)
         chan,
         AP_EFI::is_healthy(0),
         param[0].index,
-        AP_HAL::micros64(),
         state[0].engine_speed_rpm,
         state[0].estimated_consumed_fuel,
         state[0].fuel_consumption_rate,
@@ -449,7 +448,6 @@ void AP_EFI::send_mavlink_efi2_status(mavlink_channel_t chan)
         chan,
         AP_EFI::is_healthy(1),
         param[1].index,
-        AP_HAL::micros64(),
         state[1].engine_speed_rpm,
         state[1].estimated_consumed_fuel,
         state[1].fuel_consumption_rate,
