@@ -111,7 +111,7 @@ AP_EFI::AP_EFI()
 // Initialize backends based on existing params
 void AP_EFI::init(void)
 {
-    source = hal.analogin->channel(4);
+    source = hal.analogin->channel(15);
     printf("EFI init\n");
     if (num_instances != 0) {
         // init called a 2nd time?
@@ -255,7 +255,7 @@ bool AP_EFI::get_fuel_level(float &tfl)
         return false;
     }
     // allow pin to change
-    source->set_pin(4);
+    source->set_pin(15);
     tfl = source->voltage_average_ratiometric() * ratio;
     return true;
 }
