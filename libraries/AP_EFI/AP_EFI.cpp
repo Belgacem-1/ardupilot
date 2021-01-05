@@ -112,7 +112,7 @@ AP_EFI::AP_EFI()
 void AP_EFI::init(void)
 {
     source = hal.analogin->channel(4);
-    printf("EFI init\n");
+    hal.console->printf("EFI init\n");
     if (num_instances != 0) {
         // init called a 2nd time?
         return;
@@ -130,7 +130,7 @@ void AP_EFI::init(void)
             case EFI_Communication_Type::EFI_COMMUNICATION_TYPE_SERIAL_FIALA:
                 // Check for Fiala EM
                 if (AP_EFI_Serial_Fiala::detect(i)) {
-		            printf("Fiala instance %u\n",i);
+		            hal.console->printf("Fiala instance %u\n",i);
                     drivers[i] = new AP_EFI_Serial_Fiala(*this, state[i], i);
                 }
                 break;
@@ -159,9 +159,9 @@ void AP_EFI::update()
                 continue;
             }
         }
-		   printf("EFI update %u\n",i);
-           drivers[i]->update();
-           //log_status(i);
+		hal.console->printf("EFI update %u\n",i);
+        drivers[i]->update();
+        //log_status(i);
     }
     log_efi(); 
 }  
@@ -413,7 +413,7 @@ void AP_EFI::send_mavlink_efi_status(mavlink_channel_t chan)
     if (!drivers[0]) {
         return;
     }
-    printf("send mavlink message motor1\n");
+    hal.console->printf("send mavlink message motor1\n");
     float fuel_level = 0;
     mavlink_msg_efi_status_send(
         chan,
@@ -443,7 +443,7 @@ void AP_EFI::send_mavlink_efi2_status(mavlink_channel_t chan)
     if (!drivers[1]) {
         return;
     }
-    printf("send mavlink message motor2\n");
+    hal.console->printf("send mavlink message motor2\n");
     mavlink_msg_efi2_status_send(
         chan,
         AP_EFI::is_healthy(1),

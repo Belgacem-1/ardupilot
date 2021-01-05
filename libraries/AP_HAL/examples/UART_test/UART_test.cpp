@@ -67,29 +67,29 @@ static void test_uart(AP_HAL::UARTDriver *uart1, AP_HAL::UARTDriver *uart2, AP_H
     //while( nb > 0){
       for(int i=0;i<511;i++){
 		  //uart1->printf("%d data ready to read\n\r", nb1);
-          uart1->printf("dataM1[%d] = %d\n\r", i, dataM1[i]);
+          //uart1->printf("dataM1[%d] = %d\n\r", i, dataM1[i]);
           //uart1->printf("%d data ready to read\n\r", nb2);
 		  dataM1[i]=uart2->read();
 		  //dataM2[i]=uart3->read();
 		  if(dataM1[i]== 0xA5 && dataM1[i+47] == 0x0D && dataM1[i+1]== 0x5A && dataM1[i+2]== 0x01 && dataM1[i+3]== 0x00)
 		  { 
-		    uart1->printf("Moteur 1, Temperature 1: %d à la position %d \t", dataM1[i+4]+ (dataM1[i+5]<<8), i+4);
+		    uart1->printf("Moteur 1, Temperature 1: %d à la position %d \t", dataM1[i+5]+ (dataM1[i+4]<<8), i+4);
 		   // uart1->printf("Moteur 2, Temperature 1: %d à la position %d \n\r", dataM2[i+4]+ (dataM2[i+5]<<8), i+4);
-		    uart1->printf("Moteur 1, Temperature 2: %d à la position %d \t", dataM1[i+6]+ (dataM1[i+7]<<8), i+6);
+		    uart1->printf("Moteur 1, Temperature 2: %d à la position %d \t", dataM1[i+7]+ (dataM1[i+6]<<8), i+6);
 		    //uart1->printf("Moteur 2, Temperature 2: %d à la position %d \n\r", dataM2[i+6]+ (dataM2[i+7]<<8), i+6);
-		    uart1->printf("Moteur 1, RPM: %d à la position %d \t", dataM1[i+18]+ (dataM1[i+19]<<8), i+18);
+		    uart1->printf("Moteur 1, RPM: %d à la position %d \t", dataM1[i+19]+ (dataM1[i+18]<<8), i+18);
 		    //uart1->printf("Moteur 2, RPM: %d à la position %d \n\r", dataM2[i+18]+ (dataM2[i+19]<<8), i+18);
-		    uart1->printf("Moteur 1, Input voltage: %d à la position %d \t", dataM1[i+20]+ (dataM1[i+21]<<8), i+20);
+		    uart1->printf("Moteur 1, Input voltage: %d à la position %d \t", dataM1[i+21]+ (dataM1[i+20]<<8), i+20);
 		    //uart1->printf("Moteur 2, Input voltage: %d à la position %d \n\r", dataM2[i+20]+ (dataM2[i+21]<<8), i+20);
-		    uart1->printf("Moteur 1: Servo voltage: %d à la position %d \t", dataM1[i+22]+ (dataM1[i+23]<<8), i+22);
+		    uart1->printf("Moteur 1: Servo voltage: %d à la position %d \t", dataM1[i+23]+ (dataM1[i+22]<<8), i+22);
 		    //uart1->printf("Moteur 2, Servo voltage: %d à la position %d \n\r", dataM2[i+22]+ (dataM2[i+23]<<8), i+22);
-		    uart1->printf("Moteur 1, Throttle position: %d à la position %d \t", dataM1[i+26]+ (dataM1[i+27]<<8), i+26);
+		    uart1->printf("Moteur 1, Throttle position: %d à la position %d \t", dataM1[i+27]+ (dataM1[i+26]<<8), i+26);
 		    //uart1->printf("Moteur 2, Throttle position: %d à la position %d \n\r", dataM2[i+26]+ (dataM2[i+27]<<8), i+26);
-		    uart1->printf("Moteur 1, Fuel pressure: %d à la position %d \t", dataM1[i+32]+ (dataM1[i+33]<<8), i+16);
+		    uart1->printf("Moteur 1, Fuel pressure: %d à la position %d \t", dataM1[i+33]+ (dataM1[i+32]<<8), i+16);
 		    //uart1->printf("Moteur 2, Fuel pressure: %d à la position %d \n\r", dataM2[i+32]+ (dataM2[i+33]<<8), i+16);
-		    uart1->printf("Moteur 1, Fuel consumption : %d à la position %d \t", dataM1[i+34]+ (dataM1[i+35]<<8), i+16);
+		    uart1->printf("Moteur 1, Fuel consumption : %d à la position %d \t", dataM1[i+35]+ (dataM1[i+34]<<8), i+16);
 		    ///uart1->printf("Moteur 2, Fuel consumption: %d à la position %d \n\r", dataM2[i+34]+ (dataM2[i+35]<<8), i+16);
-		    uart1->printf("Moteur 1: Injection length: %d à la position %d \t", dataM1[i+44]+ (dataM1[i+45]<<8), i+44);
+		    uart1->printf("Moteur 1: Injection length: %d à la position %d \t", dataM1[i+45]+ (dataM1[i+44]<<8), i+44);
 		    //uart1->printf("Moteur 2: Injection length: %d à la position %d \n\r", dataM2[i+44]+ (dataM2[i+45]<<8), i+44);
 
 		} 
