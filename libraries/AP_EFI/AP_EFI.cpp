@@ -163,7 +163,7 @@ void AP_EFI::update()
         drivers[i]->update();
         //log_status(i);
     }
-    log_efi(); 
+    Log_EFI(); 
 }  
 
 AP_EFI_Backend *AP_EFI::get_backend(uint8_t id) const {
@@ -260,8 +260,8 @@ bool AP_EFI::get_fuel_level(float &tfl)
     return true;
 }
 
-// Write an RFND (rangefinder) packet
-void AP_EFI::log_efi()
+// Write an EFI packet
+void AP_EFI::Log_EFI()
 {
     if (_log_efi_bit == uint32_t(-1)) {
         return;

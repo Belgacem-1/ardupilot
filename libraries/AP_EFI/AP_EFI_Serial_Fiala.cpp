@@ -35,7 +35,7 @@ bool AP_EFI_Serial_Fiala::get_reading()
     }
 
     if (port->available() == 0 || now - last_response_ms > 200) {
-		hal.console->printf("now-last_response_ms= %u",now - last_response_ms);
+		hal.console->printf("now-last_response_ms= %lu",now - last_response_ms);
 		hal.console->printf("port not available after\n");
         port->discard_input();
         return false;

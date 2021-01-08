@@ -125,8 +125,8 @@ private:
     AP_HAL::AnalogSource *source;
 
     // write to log
-    void log_status(uint8_t i);
-    void log_efi();
+    //void log_status(uint8_t i);
+    void Log_EFI();
     uint32_t _log_efi_bit = -1;
 };
 
