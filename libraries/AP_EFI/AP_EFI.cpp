@@ -130,7 +130,7 @@ void AP_EFI::init(void)
             case EFI_Communication_Type::EFI_COMMUNICATION_TYPE_SERIAL_FIALA:
                 // Check for Fiala EM
                 if (AP_EFI_Serial_Fiala::detect(i)) {
-		            printf("Fiala instance %u\n",i);
+		            hal.console->printf("Fiala instance %u\n",i);
                     drivers[i] = new AP_EFI_Serial_Fiala(*this, state[i], i);
                 }
                 break;
@@ -152,18 +152,18 @@ void AP_EFI::update()
 {
     for (uint8_t i=0; i<num_instances; i++) {
         if (drivers[i]) {
-           if((EFI_Communication_Type)param[i].type.get() != EFI_Communication_Type::EFI_COMMUNICATION_TYPE_NONE){
+           if((EFI_Communication_Type)param[i].type.get() == EFI_Communication_Type::EFI_COMMUNICATION_TYPE_NONE){
                 // allow user to disable a rangefinder at runtime
                 state[i].status = Status::NotConnected;
                 state[i].range_valid_count = 0;
                 continue;
             }
         }
-		   printf("EFI update %u\n",i);
-           drivers[i]->update();
-           //log_status(i);
+		hal.console->printf("EFI update %u\n",i);
+        drivers[i]->update();
+        //log_status(i);
     }
-    log_efi(); 
+    Log_EFI(); 
 }  
 
 AP_EFI_Backend *AP_EFI::get_backend(uint8_t id) const {
@@ -260,8 +260,8 @@ bool AP_EFI::get_fuel_level(float &tfl)
     return true;
 }
 
-// Write an RFND (rangefinder) packet
-void AP_EFI::log_efi()
+// Write an EFI packet
+void AP_EFI::Log_EFI()
 {
     if (_log_efi_bit == uint32_t(-1)) {
         return;
@@ -413,7 +413,7 @@ void AP_EFI::send_mavlink_efi_status(mavlink_channel_t chan)
     if (!drivers[0]) {
         return;
     }
-    printf("send mavlink message motor1\n");
+    hal.console->printf("send mavlink message motor1\n");
     float fuel_level = 0;
     mavlink_msg_efi_status_send(
         chan,
@@ -443,7 +443,7 @@ void AP_EFI::send_mavlink_efi2_status(mavlink_channel_t chan)
     if (!drivers[1]) {
         return;
     }
-    printf("send mavlink message motor2\n");
+    hal.console->printf("send mavlink message motor2\n");
     mavlink_msg_efi2_status_send(
         chan,
         AP_EFI::is_healthy(1),

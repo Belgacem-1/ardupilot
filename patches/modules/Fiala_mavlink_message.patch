@@ -1,10 +1,13 @@
-diff --git a/modules/mavlink/message_definitions/v1.0/common.xml b/modules/mavlink/message_definitions/v1.0/common.xml
-index 4e7abfa3..014d5e3e 100644
---- a/modules/mavlink/message_definitions/v1.0/common.xml
-+++ b/modules/mavlink/message_definitions/v1.0/common.xml
-@@ -4928,20 +4928,24 @@
+diff --git a/message_definitions/v1.0/common.xml b/message_definitions/v1.0/common.xml
+index 4e7abfa3..90d97f93 100644
+--- a/message_definitions/v1.0/common.xml
++++ b/message_definitions/v1.0/common.xml
+@@ -4926,22 +4926,26 @@
+     <message id="225" name="EFI_STATUS">
+       <description>EFI status output</description>
        <field type="uint8_t" name="health">EFI health status</field>
-       <field type="float" name="ecu_index">ECU index</field>
+-      <field type="float" name="ecu_index">ECU index</field>
++      <field type="uint8_t" name="ecu_index">ECU index</field>
        <field type="float" name="rpm">RPM</field>
 -      <field type="float" name="fuel_consumed" units="g">Fuel consumed</field>
 -      <field type="float" name="fuel_flow" units="g/min">Fuel flow rate</field>
@@ -15,7 +18,7 @@ index 4e7abfa3..014d5e3e 100644
        <field type="float" name="spark_dwell_time" units="ms">Spark dwell time</field>
        <field type="float" name="barometric_pressure" units="kPa">Barometric pressure</field>
 -      <field type="float" name="intake_manifold_pressure" units="kPa">Intake manifold pressure(</field>
-+      <field type="float" name="intake_manifold_pressure" units="bar">Intake manifold pressure</field>
++      <field type="float" name="fuel_pressure" units="bar">Fuel pressure</field>
        <field type="float" name="intake_manifold_temperature" units="degC">Intake manifold temperature</field>
 -      <field type="float" name="cylinder_head_temperature" units="degC">Cylinder head temperature</field>
 +      <field type="float" name="cylinder_head_temperature" units="degC">First cylinder head temperature</field>
@@ -26,24 +29,25 @@ index 4e7abfa3..014d5e3e 100644
        <field type="float" name="throttle_out" units="%">Output throttle</field>
        <field type="float" name="pt_compensation">Pressure/temperature compensation</field>
 +      <field type="float" name="cylinder_head_temperature2" units="degC">Second cylinder head temperature</field>
-+      <field type="float" name="fuel_level" units="l">Tank fuel level</field>
++      <field type="float" name="fuel_level" units="l">Fuel tank level</field>
 +      <field type="float" name="input_voltage" units="V">EFI input voltage</field>
 +      <field type="float" name="servo_voltage" units="V">Throttle servo input voltage</field>
      </message>
      <!-- MESSAGE IDs 180 - 229: Space for custom messages in individual projectname_messages.xml files -->
      <message id="230" name="ESTIMATOR_STATUS">
-@@ -5055,6 +5059,20 @@
+@@ -5055,6 +5059,21 @@
        <field type="int8_t" name="custom1">Field for custom payload.</field>
        <field type="int8_t" name="custom2">Field for custom payload.</field>
      </message>
 +    <message id="236" name="EFI2_STATUS">
 +      <description>EFI2 status output</description>
 +      <field type="uint8_t" name="health">EFI2 health status</field>
++      <field type="uint8_t" name="ecu_index">ECU index</field>
 +      <field type="float" name="rpm">RPM</field>
 +      <field type="float" name="fuel_consumed" units="l">Fuel consumed</field>
 +      <field type="float" name="fuel_flow" units="l/h">Fuel flow rate</field>
 +      <field type="float" name="throttle_position" units="%">Throttle position</field>
-+      <field type="float" name="intake_manifold_pressure" units="bar">Intake manifold pressure</field>
++      <field type="float" name="fuel_pressure" units="bar">Fuel pressure</field>
 +      <field type="float" name="cylinder_head_temperature" units="degC">First cylinder head temperature</field>
 +      <field type="float" name="injection_time" units="us">Injection time</field>
 +      <field type="float" name="cylinder_head_temperature2" units="degC">Second cylinder head temperature</field>

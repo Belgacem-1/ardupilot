@@ -2100,20 +2100,20 @@ struct PACKED log_PSC {
 // @LoggerMessage: EFI
 // @Description: EFI information
 // @Field: TimeUS: Time since system startup
-// @Field: Instance: EFI instance number this data is from
+// @Field: I: EFI instance number this data is from
 // @Field: Rpm: Reported rpm from EFI
-// @Field: Stat: EFI state
+// @Field: Sta: EFI state
 // @Field: EcuI: ECU index
 // @Field: Tps: Throttle position 
 // @Field: Cht1: Cylinder head temperature 1
 // @Field: Cht2: Cylinder head temperature 2
-// @Field: InjL: Injection lenght
+// @Field: InL: Injection lenght
 // @Field: InV: Input voltage 
 // @Field: SeV: Servo voltage
 // @Field: FuP: Fuel pressure
-// @Field: FuCR: Fuel consumption rate 
-// @Field: EsCFu: Estimated consumed fuel
-// @Field: FuTL: Fuel tank level
+// @Field: FCR: Fuel consumption rate 
+// @Field: ECF: Estimated consumed fuel
+// @Field: FTL: Fuel tank level
 
 // @LoggerMessage: RPM
 // @Description: Data from RPM sensors
@@ -2517,7 +2517,7 @@ struct PACKED log_PSC {
     { LOG_RFND_MSG, sizeof(log_RFND), \
       "RFND", "QBCBB", "TimeUS,Instance,Dist,Stat,Orient", "s#m--", "F-B--" }, \
     { LOG_EFI_MSG,  sizeof(log_EFI), \
-      "EFI", "QBIBBBfffffffff", "TimeUS,Instance,Rpm,Stat,EcuI,Tps,Cht1,Cht2,InjL,InV,SeV,FuP,FuCR,EsCFu,FuTL", "s#q--%OOsvvPcll", "F-------F--E---" }, \
+      "EFI", "QBIBBBfffffffff", "TimeUS,I,Rpm,Sta,EcuI,Tps,Cht1,Cht2,InL,InV,SeV,FuP,FCR,ECF,FTL", "s#q--%OOsvvPcll", "F-------F--E---" }, \
     { LOG_MAV_STATS, sizeof(log_MAV_Stats), \
       "DMS", "QIIIIBBBBBBBBB",         "TimeUS,N,Dp,RT,RS,Fa,Fmn,Fmx,Pa,Pmn,Pmx,Sa,Smn,Smx", "s-------------", "F-------------" }, \
     { LOG_BEACON_MSG, sizeof(log_Beacon), \
