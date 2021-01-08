@@ -1,7 +1,7 @@
-diff --git a/message_definitions/v1.0/common.xml b/message_definitions/v1.0/common.xml
+diff --git a/modules/mavlink/message_definitions/v1.0/common.xml b/modules/mavlink/message_definitions/v1.0/common.xml
 index 4e7abfa3..90d97f93 100644
---- a/message_definitions/v1.0/common.xml
-+++ b/message_definitions/v1.0/common.xml
+--- a/modules/mavlink/message_definitions/v1.0/common.xml
++++ b/modules/mavlink/message_definitions/v1.0/common.xml
 @@ -4926,22 +4926,26 @@
      <message id="225" name="EFI_STATUS">
        <description>EFI status output</description>
