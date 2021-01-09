@@ -250,7 +250,7 @@ bool AP_EFI::is_healthy(uint8_t i) const
     return (drivers[i] && (AP_HAL::millis() - state[i].last_reading_ms) < HEALTHY_LAST_RECEIVED_MS);
 }
 
-bool AP_EFI::get_fuel_level(float &tfl)
+bool AP_EFI::get_fuel_level(float &ftl)
 {
     if (source == nullptr) {
         return false;
@@ -258,6 +258,11 @@ bool AP_EFI::get_fuel_level(float &tfl)
     // allow pin to change
     source->set_pin(15);
     ftl = source->voltage_average_ratiometric() * ratio;
+    if(ftl < 1.0f)
+    {
+        gcs().send_text(MAV_SEVERITY_INFO, "Fuel tank exhausted");
+    }
+
     return true;
 }
 

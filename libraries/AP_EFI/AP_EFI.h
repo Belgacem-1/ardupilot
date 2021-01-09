@@ -70,7 +70,7 @@ public:
     bool is_healthy(uint8_t i) const;
 
     // return the current fuel_level in liter
-    bool get_fuel_level(float &tfl);
+    bool get_fuel_level(float &ftl);
 
     void set_log_efi_bit(uint32_t log_efi_bit) { _log_efi_bit = log_efi_bit; }
 
