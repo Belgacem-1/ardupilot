@@ -130,7 +130,7 @@ void AP_EFI::init(void)
             case EFI_Communication_Type::EFI_COMMUNICATION_TYPE_SERIAL_FIALA:
                 // Check for Fiala EM
                 if (AP_EFI_Serial_Fiala::detect(i)) {
-		            hal.console->printf("Fiala instance %u\n",i);
+		            printf("Fiala instance %u\n",i);
                     drivers[i] = new AP_EFI_Serial_Fiala(*this, state[i], i);
                 }
                 break;
@@ -154,12 +154,13 @@ void AP_EFI::update()
         if (drivers[i]) {
            if((EFI_Communication_Type)param[i].type.get() == EFI_Communication_Type::EFI_COMMUNICATION_TYPE_NONE){
                 // allow user to disable a rangefinder at runtime
+                printf("Disable update EFI %u\n",i);
                 state[i].status = Status::NotConnected;
                 state[i].range_valid_count = 0;
                 continue;
             }
         }
-		hal.console->printf("EFI update %u\n",i);
+		printf("EFI update %u\n",i);
         drivers[i]->update();
         //log_status(i);
     }
@@ -256,7 +257,7 @@ bool AP_EFI::get_fuel_level(float &tfl)
     }
     // allow pin to change
     source->set_pin(15);
-    tfl = source->voltage_average_ratiometric() * ratio;
+    ftl = source->voltage_average_ratiometric() * ratio;
     return true;
 }
 
@@ -264,20 +265,23 @@ bool AP_EFI::get_fuel_level(float &tfl)
 void AP_EFI::Log_EFI()
 {
     if (_log_efi_bit == uint32_t(-1)) {
+        printf("log not available before\n");
         return;
     }
 
     AP_Logger &logger = AP::logger();
     if (!logger.should_log(_log_efi_bit)) {
+        printf("log not available after\n");
         return;
     }
     float fuel_level = 0;
     for (uint8_t i=0; i<EFI_MAX_INSTANCES; i++) {
         const AP_EFI_Backend *s = get_backend(i);
         if (s == nullptr) {
+            printf("log not available for %u\n",i);
             continue;
         }
-
+        printf("log available for \n",i);
         const struct log_EFI pkt = {
                 LOG_PACKET_HEADER_INIT(LOG_EFI_MSG),
                 time_us           : AP_HAL::micros64(),
@@ -413,7 +417,7 @@ void AP_EFI::send_mavlink_efi_status(mavlink_channel_t chan)
     if (!drivers[0]) {
         return;
     }
-    hal.console->printf("send mavlink message motor1\n");
+    printf("send mavlink message motor1\n");
     float fuel_level = 0;
     mavlink_msg_efi_status_send(
         chan,
@@ -443,7 +447,7 @@ void AP_EFI::send_mavlink_efi2_status(mavlink_channel_t chan)
     if (!drivers[1]) {
         return;
     }
-    hal.console->printf("send mavlink message motor2\n");
+    printf("send mavlink message motor2\n");
     mavlink_msg_efi2_status_send(
         chan,
         AP_EFI::is_healthy(1),
@@ -451,7 +455,7 @@ void AP_EFI::send_mavlink_efi2_status(mavlink_channel_t chan)
         state[1].engine_speed_rpm,
         state[1].estimated_consumed_fuel,
         state[1].fuel_consumption_rate,
-        state[1].throttle_position_percent,
+        state[0].throttle_position_percent,
         state[1].fuel_pressure,
         state[1].cylinder_status[0].cylinder_head_temperature,
         state[1].cylinder_status[0].injection_time_ms,
