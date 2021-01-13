@@ -57,7 +57,7 @@ bool AP_EFI_Serial_Fiala::read_incoming_realtime_data()
     head_flag2 = read_byte();
     packet_flag = read_byte();
     hal.console->printf("Reading bytes\n");
-    if (head_flag1 != HEAD_BYTE_1 && head_flag2 != HEAD_BYTE_2 && packet_flag!= PACKET_ID) {
+    if (head_flag1 != HEAD_BYTE_1 || head_flag2 != HEAD_BYTE_2 || packet_flag!= PACKET_ID) {
         // abort read if we did not receive the correct response code;
         return false;
     }

@@ -249,14 +249,18 @@ bool AP_EFI::is_healthy(uint8_t i) const
     return (drivers[i] && (AP_HAL::millis() - state[i].last_reading_ms) < HEALTHY_LAST_RECEIVED_MS);
 }
 
-bool AP_EFI::get_fuel_level(float &tfl)
+bool AP_EFI::get_fuel_level(float &ftl)
 {
     if (source == nullptr) {
         return false;
     }
     // allow pin to change
     source->set_pin(4);
-    tfl = source->voltage_average_ratiometric() * ratio;
+    ftl = source->voltage_average_ratiometric() * ratio;
+    if(ftl < 1.0f)
+    {
+        gcs().send_text(MAV_SEVERITY_INFO, "Fuel tank exhausted");
+    }
     return true;
 }
 
@@ -422,15 +426,11 @@ void AP_EFI::send_mavlink_efi_status(mavlink_channel_t chan)
         state[0].engine_speed_rpm,
         state[0].estimated_consumed_fuel,
         state[0].fuel_consumption_rate,
-        0,
         state[0].throttle_position_percent,
-        0, 0,
         state[0].fuel_pressure,
-        0,
         state[0].cylinder_status[0].cylinder_head_temperature,
-        0,
         state[0].cylinder_status[0].injection_time_ms,
-        0, 0, 0,
+        state[0].cylinder_status[0].exhaust_gas_temperature,
         state[0].cylinder_status[1].cylinder_head_temperature,
         get_fuel_level(fuel_level)?fuel_level:state[0].fuel_tank_level,
         state[0].input_voltage,
@@ -444,6 +444,7 @@ void AP_EFI::send_mavlink_efi2_status(mavlink_channel_t chan)
         return;
     }
     hal.console->printf("send mavlink message motor2\n");
+    float fuel_level = 0;
     mavlink_msg_efi2_status_send(
         chan,
         AP_EFI::is_healthy(1),
@@ -455,7 +456,9 @@ void AP_EFI::send_mavlink_efi2_status(mavlink_channel_t chan)
         state[1].fuel_pressure,
         state[1].cylinder_status[0].cylinder_head_temperature,
         state[1].cylinder_status[0].injection_time_ms,
+        state[1].cylinder_status[0].exhaust_gas_temperature,
         state[1].cylinder_status[1].cylinder_head_temperature,
+        get_fuel_level(fuel_level)?fuel_level:state[1].fuel_tank_level,
         state[1].input_voltage,
         state[1].servo_voltage);
 }
