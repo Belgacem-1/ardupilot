@@ -1,7 +1,7 @@
-diff --git a/message_definitions/v1.0/common.xml b/message_definitions/v1.0/common.xml
+diff --git a/modules/mavlink/message_definitions/v1.0/common.xml b/modules/mavlink/message_definitions/v1.0/common.xml
 index 4e7abfa3..593783f9 100644
---- a/message_definitions/v1.0/common.xml
-+++ b/message_definitions/v1.0/common.xml
+--- a/modules/mavlink/message_definitions/v1.0/common.xml
++++ b/modules/mavlink/message_definitions/v1.0/common.xml
 @@ -4926,22 +4926,19 @@
      <message id="225" name="EFI_STATUS">
        <description>EFI status output</description>
@@ -51,8 +51,8 @@ index 4e7abfa3..593783f9 100644
 +      <field type="float" name="cylinder_head_temperature" units="degC">First cylinder head temperature</field>
 +      <field type="float" name="injection_time" units="us">Injection time</field>
 +      <field type="float" name="exhaust_gas_temperature" units="degC">Exhaust gas temperature</field>
-+      <field type="float" name="fuel_level" units="l">Fuel tank level</field>
 +      <field type="float" name="cylinder_head_temperature2" units="degC">Second cylinder head temperature</field>
++      <field type="float" name="fuel_level" units="l">Fuel tank level</field>
 +      <field type="float" name="input_voltage" units="V">EFI2 input voltage</field>
 +      <field type="float" name="servo_voltage" units="V">Throttle servo input voltage</field>
 +    </message>
