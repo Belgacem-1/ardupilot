@@ -28,14 +28,15 @@ void setup (void)
     for (uint8_t i = 0; i< 14; i++) {
         hal.rcout->enable_ch(i);
     }
+    hal.rcout->write(3, 1500);
 }
 
-static uint16_t pwm = 1500;
-static int8_t delta = 1;
+//static uint16_t pwm = 1500;
+//static int8_t delta = 1;
 
 void loop (void)
 {
-    for (uint8_t i=0; i < 14; i++) {
+   /* for (uint8_t i=0; i < 14; i++) {
         hal.rcout->write(i, pwm);
         pwm += delta;
         if (delta > 0 && pwm >= 2000) {
@@ -45,7 +46,8 @@ void loop (void)
             delta = 1;
             hal.console->printf("increasing\n");
         }
-    }
+    }*/
+    hal.rcout->write(3, 800);
     hal.scheduler->delay(5);
 }
 

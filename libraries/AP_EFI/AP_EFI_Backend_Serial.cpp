@@ -58,6 +58,7 @@ void AP_EFI_Backend_Serial::update(void)
         state.last_reading_ms = AP_HAL::millis();
         update_status();
     } else if (AP_HAL::millis() - state.last_reading_ms > read_timeout_ms()) {
+		gcs().send_text(MAV_SEVERITY_INFO, "Backend not available");
         set_status(Status::NoData);
     }
 }

@@ -35,8 +35,6 @@ bool AP_EFI_Serial_Fiala::get_reading()
     }
 
     if (port->available() == 0 || now - last_response_ms > 200) {
-		hal.console->printf("now-last_response_ms= %lu",now - last_response_ms);
-		hal.console->printf("port not available after\n");
         port->discard_input();
         return false;
     }
@@ -56,7 +54,6 @@ bool AP_EFI_Serial_Fiala::read_incoming_realtime_data()
     head_flag1 = read_byte();
     head_flag2 = read_byte();
     packet_flag = read_byte();
-    hal.console->printf("Reading bytes\n");
     if (head_flag1 != HEAD_BYTE_1 || head_flag2 != HEAD_BYTE_2 || packet_flag!= PACKET_ID) {
         // abort read if we did not receive the correct response code;
         return false;
@@ -65,7 +62,6 @@ bool AP_EFI_Serial_Fiala::read_incoming_realtime_data()
     // Iterate over the payload bytes 
     for ( uint8_t offset=RT_FIRST_OFFSET-1; offset < RT_LAST_OFFSET; offset++) {
         uint8_t data = read_byte();
-        hal.console->printf("offset= %u\n",offset);
         float temp_float;
         switch (offset) {
             case CHT1_MSB:
@@ -137,7 +133,6 @@ bool AP_EFI_Serial_Fiala::read_incoming_realtime_data()
                         
     if (received_sum != sum) {
         // hal.console->printf("EFI CRC: 0x%08x 0x%08x\n", received_CRC, checksum);
-        hal.console->printf("packet not ok\n");
         return false;
     }
 
@@ -158,7 +153,6 @@ bool AP_EFI_Serial_Fiala::read_incoming_realtime_data()
 
 uint8_t AP_EFI_Serial_Fiala::read_byte()
 {   
-    hal.console->printf("update crc\n");
     // Read a byte and update the CRC 
     uint8_t data = port->read();
     sum = compute_byte(sum, data);
@@ -168,7 +162,6 @@ uint8_t AP_EFI_Serial_Fiala::read_byte()
 // Sum matching Fiala
 uint8_t AP_EFI_Serial_Fiala::compute_byte(uint8_t sum_b, uint8_t data)
 {
-    hal.console->printf("crc computing\n");
     sum = sum + data;
     return sum;
 }
